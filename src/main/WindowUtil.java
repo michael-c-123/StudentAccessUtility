@@ -57,6 +57,8 @@ public class WindowUtil {
         field.addActionListener(e -> button.doClick());
     }
 
+    public static final int CANCELLED = -1;
+    public static final int RESET = -2;
     public static double showSpinnerDialog(String title, double start, double min, double max, double step,
             String format, boolean giveResetOption, JComponent... compenents) {
 
@@ -87,8 +89,8 @@ public class WindowUtil {
         if (option == 0)  //OK option
             return (Double) spinner.getValue();
         else if (option == 1 && giveResetOption) //Reset option
-            return -2;
-        return -1;
+            return RESET;
+        return CANCELLED; //cancelled or closed
     }
 
     public static JSpinner makeSpinner(JButton linkedButton,

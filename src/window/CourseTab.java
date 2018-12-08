@@ -65,7 +65,7 @@ public final class CourseTab extends Button implements Drawable {
             addGrade(entryGrade);
         }
         course.update();
-        updateBars(false);
+        updateBars(true);
     }
 
     private void initAddButton() {
@@ -146,7 +146,7 @@ public final class CourseTab extends Button implements Drawable {
                         nameField.getText().trim(), majorButton.isSelected(),
                         (Double) weightSpinner.getValue(), grade));
                 course.update();
-                updateBars(false);
+                updateBars(true);
             }
         });
         addButton.setEnabled(false);
@@ -160,8 +160,9 @@ public final class CourseTab extends Button implements Drawable {
                 JOptionPane.showMessageDialog(null,
                         "Reset another controlled value to control this value.", "Deadlock", JOptionPane.WARNING_MESSAGE);
             }
-            else
+            else {
                 showChangeWindow(course.getCurrent(true), "Control Current Grade");
+            }
         });
         endBar.getButtons()[1].setEnabled(false);
         endBar.getButtons()[2].setEnabled(false);
@@ -179,14 +180,15 @@ public final class CourseTab extends Button implements Drawable {
                 start, 0, 120, .1, "0.0", true);
         if (input >= 0)
             grade.manipulate(input);
-        else if (input == -2)
+        else if (input == WindowUtil.RESET)
             grade.reset();
         course.update();
-        updateBars(false);
+        updateBars(true);
     }
 
     //change colors, disable/enable
-    private void updateBars(boolean doPositions) {
+    private void updateBars(boolean lockResponder) {
+        boolean doPositions = false;
         endBar.getButtons()[0].setColor(Grade.getColorDark(
                 course.getCurrent(true).getModStatus(), settings)); //update color
         endBar.getButtons()[3].setColor(Grade.getColorDark(
@@ -195,10 +197,6 @@ public final class CourseTab extends Button implements Drawable {
                 course.getExam().getModStatus(), settings));
         endBar.getButtons()[5].setColor(Grade.getColorDark(
                 course.getSem().getModStatus(), settings));
-
-        for (Bar bar : gradeBarList) {
-            bar.updateText();
-        }
 
         //put last grade in
         if (course.getGradeList().size() > gradeBarList.size()) {
@@ -221,17 +219,52 @@ public final class CourseTab extends Button implements Drawable {
             }
         }
 
-//        //update positions
-//        if (doPositions) {
-//            System.out.println("reeee");
-//            final int SIZE = (int) settings.get("grade bar size");
-//            int vertPosition = TITLE_HEIGHT; //room for title bar
-//
-//            for (Bar bar : gradeBarList) {
-//                bar.setY(vertPosition);
-//                vertPosition += SIZE + 1; //+1 for small gaps b/t bars
-//            }
-//        }
+        if (lockResponder) {
+            Bar soleResponder = null;
+            boolean foundSoleResponder = false;
+            for (Bar bar : gradeBarList) {
+                bar.updateText();
+                if (bar.getGrade().getModStatus() == Grade.RESPONDING
+                        && !bar.getGrade().isEmpty()) {
+                    if (foundSoleResponder) {
+                        soleResponder = null;
+                    }
+                    else {
+                        soleResponder = bar;
+                        foundSoleResponder = true;
+                    }
+                }
+            }
+            if (soleResponder != null) {
+                soleResponder.setPreventDelete(true);
+                System.out.println("locked");
+            }
+            else {
+                for (Bar bar : gradeBarList)
+                    bar.setPreventDelete(false);
+                System.out.println("unlocked");
+            }
+        }
+
+        //update positions
+        if (doPositions) {
+            final int SIZE = (int) settings.get("grade bar size");
+            int vertPosition = TITLE_HEIGHT; //room for title bar
+            vertPosition += SIZE + 1; //room for the label bar
+
+            for (Bar bar : gradeBarList) {
+                bar.setInitialScroll(vertPosition);
+                vertPosition += SIZE + 1; //+1 for small gaps b/t bars
+            }
+        }
+    }
+
+    private Bar findBarForGrade(EntryGrade grade) {
+        for (Bar bar : gradeBarList) {
+            if (bar.getGrade() == grade)
+                return bar;
+        }
+        return null;
     }
 
     @Override
@@ -352,7 +385,7 @@ public final class CourseTab extends Button implements Drawable {
             scrollPosition = 0;
         else {
             final int SIZE = (int) settings.get("grade bar size");
-            int endOfBars = gradeBarList.size() * (SIZE + 5); // TOODLE make this accurate and stop scrolling at the correct location
+            int endOfBars = gradeBarList.size() * (SIZE + 5); // TODO make this accurate and stop scrolling at the correct location
             endOfBars += TITLE_HEIGHT;
             if (scrollPosition + panel.getHeight() > endOfBars)
                 scrollPosition = endOfBars - panel.getHeight();
@@ -378,16 +411,14 @@ public final class CourseTab extends Button implements Drawable {
         bar.setDimensions(0, vertPosition, 0, SIZE); //0s are placeholders, will be replaced by drawUsing()
         gradeBarList.add(bar);
 
-        //let buttons trigger course calculator to update, and then update bar texts
+        //let buttons trigger course calculator to update, and then update bar text
         Button[] buttons = bar.getButtons();
         for (int i = 0; i < buttons.length; i++) {
+            final int index = i;
             if (i != 1 && i != 2)
                 buttons[i].addActionListener(event -> {
-                    updateBars(false);
+                    updateBars(index == 0);
                     course.update();
-                    for (Bar otherBar : gradeBarList) {
-                        otherBar.updateText();
-                    }
                 });
         }
     }

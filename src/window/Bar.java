@@ -24,8 +24,8 @@ import student.Grade;
 public final class Bar {
     private final Button[] buttons;
     private int x, y, w, h;
-    private final int initialScroll; //remembers its initial position before scrolling
-    private EntryGrade grade; //the grade displayed by the bar
+    private int initialScroll; //remembers its initial position before scrolling
+    private final EntryGrade grade; //the grade displayed by the bar
     private Map<String, Object> settings;
     private boolean[] enabledStatuses = new boolean[6];
 
@@ -42,6 +42,7 @@ public final class Bar {
                 if (text[i] != null)
                     buttons[i].setText(text[i]);
         initialScroll = 0;
+        grade = null;
     }
 
     public Bar(EntryGrade grade, JPanel panel, Map<String, Object> settings, int y) {
@@ -82,10 +83,17 @@ public final class Bar {
         buttons[0].addActionListener(event -> {
             boolean setGray = true;
             if (grade.isUserDefined()) {
-                int option = JOptionPane.showConfirmDialog(null,
-                        "Are you sure you want to delete \""+grade.getName()+"\"?",
-                        "Confirm", JOptionPane.YES_NO_OPTION);
-                setGray = option == JOptionPane.OK_OPTION;
+                setGray = false;
+                if (preventDelete) {
+                    JOptionPane.showMessageDialog(null,
+                        "You cannot delete this grade while the Current Grade is controlled.", "Deadlock", JOptionPane.WARNING_MESSAGE);
+                }
+                else {
+                    int option = JOptionPane.showConfirmDialog(null,
+                            "Are you sure you want to delete \"" + grade.getName() + "\"?",
+                            "Confirm", JOptionPane.YES_NO_OPTION);
+                    setGray = option == JOptionPane.OK_OPTION;
+                }
             }
             if (setGray) {
                 grade.setGrayed(!grade.isGrayed());
@@ -94,13 +102,19 @@ public final class Bar {
         });
     }
 
+    private boolean preventDelete;
+
+    public void setPreventDelete(boolean preventDelete) {
+        this.preventDelete = preventDelete;
+    }
+
     //NAME button
     private void initListener2() {
         buttons[2].addActionListener(event -> {
 
             JButton[] options;
             if (!grade.isUserDefined())
-                options = WindowUtil.makeButtons("OK","Reset", "Cancel");
+                options = WindowUtil.makeButtons("OK", "Reset", "Cancel");
             else
                 options = WindowUtil.makeButtons("OK", "Cancel");
 
@@ -183,6 +197,10 @@ public final class Bar {
         });
     }
 
+    public EntryGrade getGrade() {
+        return grade;
+    }
+
     public void updateText() {
         if (grade.isUserDefined()) {
             buttons[1].setText(grade.getModStatus() == Grade.MANIPULATED ? "CONTROL" : "RESPONSE");
@@ -204,7 +222,7 @@ public final class Bar {
         int bold = grade.isMajor() ? Font.BOLD : Font.PLAIN;
         int ital = grade.isGrayed() ? Font.ITALIC : Font.PLAIN;
         for (Button button : buttons)
-            button.setFontStyle(bold|ital);
+            button.setFontStyle(bold | ital);
 
         if (!grade.getName().equals(grade.getOriginalName()) && !grade.isUserDefined()) //name has been changed
             buttons[2].setFontColor((Color) settings.get("color manipulated"));
@@ -294,6 +312,11 @@ public final class Bar {
 
     public void setY(int y) {
         setDimensions(x, y, w, h);
+    }
+
+    public void setInitialScroll(int y) {
+        setDimensions(x, y, w, h);
+        initialScroll = y;
     }
 
     public void setW(int w) {
