@@ -134,10 +134,9 @@ public class WebAccessor {
                             Integer.parseInt(fields[3])),
                     Integer.parseInt(fields[5]),
                     Integer.parseInt(fields[6]));
-            driver.switchTo().frame("main"); //TODO this is throwing WebDriverExcepiton
+            driver.switchTo().frame("main");
             updateReportCard(driver, profile); //fill out courses for profile
-//            updateReportCard(driver, profile);
-//            updateClassWork(driver, profile);
+            updateClassWork(driver, profile); //get grades from each class
         }
         catch (WebDriverException e) {  //brower closed
 //            e.printStackTrace();
@@ -161,7 +160,6 @@ public class WebAccessor {
             Arrays.fill(fields, "");
             boolean loggedIn = false;
             driver = new ChromeDriver(OPTIONS);
-//            driver = new InternetExplorerDriver(IE_OPTIONS);
             WebDriverWait wait = new WebDriverWait(driver, 86400);
             while (!loggedIn) {
                 sendKeys(driver, profile);   //enter data
@@ -173,7 +171,7 @@ public class WebAccessor {
 
                 }
                 catch (StaleElementReferenceException e) {
-                    System.out.print("its fucking stale at: ");
+                    System.out.print("its stale at: ");
                     System.out.println(driver.getCurrentUrl());
 
                 }
@@ -197,7 +195,7 @@ public class WebAccessor {
             }
         }
         catch (WebDriverException e) {
-            System.out.println("TEST: reeee webdriverexception");
+            System.out.println("TEST: webdriverexception");
             e.printStackTrace();
         }
         finally {
@@ -237,7 +235,7 @@ public class WebAccessor {
     private static void sendKeys(WebDriver driver, Profile p) {
         WebElement table = driver.findElement(By.cssSelector(
                 "body > font > center > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody"));
-        long time = System.currentTimeMillis();
+        long time = System.currentTimeMillis(); //check time taken for each element filled
         //find all the elements
         System.out.println(0);
         table.findElement(By.cssSelector(

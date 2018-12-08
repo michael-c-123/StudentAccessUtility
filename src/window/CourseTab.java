@@ -74,6 +74,7 @@ public final class CourseTab extends Button implements Drawable {
                 "", (Color) settings.get("color dark"),
                 (Button.ButtonPlan) settings.get("style"));
         addButton.addActionListener(event -> {
+            //radio buttons, manip/response
             JRadioButton manipButton = new JRadioButton("Control");
             JRadioButton respoButton = new JRadioButton("Response");
             ButtonGroup groupMR = new ButtonGroup();
@@ -84,6 +85,7 @@ public final class CourseTab extends Button implements Drawable {
             radioMR.add(manipButton);
             radioMR.add(respoButton);
 
+            //radio buttons, major/daily
             JRadioButton majorButton = new JRadioButton("Major");
             JRadioButton dailyButton = new JRadioButton("Daily");
             ButtonGroup groupMD = new ButtonGroup();
@@ -93,8 +95,6 @@ public final class CourseTab extends Button implements Drawable {
             JPanel radioMD = new JPanel();
             radioMD.add(majorButton);
             radioMD.add(dailyButton);
-
-            JButton[] options = WindowUtil.makeButtons("OK", "Cancel");
 
             JPanel namePanel = new JPanel();
             namePanel.add(new JLabel("Name"));
@@ -129,6 +129,8 @@ public final class CourseTab extends Button implements Drawable {
             msgPanel.add(weightPanel);
             msgPanel.add(radioMD);
             msgPanel.add(gradePanel);
+
+            JButton[] options = WindowUtil.makeButtons("OK", "Cancel");
 
             int option = JOptionPane.showOptionDialog(null, //parent
                     msgPanel, //message
