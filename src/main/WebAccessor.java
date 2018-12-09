@@ -7,10 +7,12 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -188,7 +190,6 @@ public class WebAccessor {
             try {
                 updateReportCard(driver, profile);
                 updateClassWork(driver, profile);
-                //TODO if changed semester, update that
             }
             catch (NoSuchElementException e) {
                 System.err.println("TEST: failed to get grades.");
@@ -333,9 +334,9 @@ public class WebAccessor {
             workTab.click();
             WebElement top = driver.findElement(By.xpath("/html/body/center[2]/table/tbody/tr[1]/td"));
             int index = top.getText().indexOf(" is "); //find this in the text
-            int markingPeriod = top.getText().charAt(index + 4) -48; //move 4 indices up to get marking period, -48 to convert to int
+            int markingPeriod = top.getText().charAt(index + 4) - 48; //move 4 indices up to get marking period, -48 to convert to int
             if (markingPeriod > 4 || markingPeriod < 1)
-                throw new ArrayIndexOutOfBoundsException("Invalid makring period:" +markingPeriod);
+                throw new ArrayIndexOutOfBoundsException("Invalid makring period:" + markingPeriod);
             for (Course course : profile.getCourses()) {
                 course.setOnM1(markingPeriod % 2 != 0); //1 or 3 means set to M1
             }
@@ -360,8 +361,10 @@ public class WebAccessor {
 
             List<WebElement> rows = gradeTable.findElements(By.tagName("tr"));
             List<EntryGrade> grades = course.getGradeList();
-            int j = 0;
-            for (int i = 1; i < rows.size() - 1; i++) {
+            List<EntryGrade> newGrades = new ArrayList<>();
+
+            //go through the table, adding each row as a EntryGrade to newGrades
+            for (int i = 1; i < rows.size() - 1; i++) { //ignore the first and last rows
                 List<WebElement> rowCells = rows.get(i).findElements(By.tagName("td"));
                 String gradeString = rowCells.get(4).getText();
                 if (gradeString.equals("-") || gradeString.equalsIgnoreCase("X"))
@@ -375,21 +378,30 @@ public class WebAccessor {
                         rowCells.get(3).getText().equalsIgnoreCase("Major"),
                         Double.parseDouble(rowCells.get(5).getText()),
                         Double.parseDouble(gradeString));
-                if (grades.size() <= j)
-                    course.getGradeList().add(j, read);
-                else if (!grades.get(j).equals(read)) {
-                    course.getGradeList().add(j, read);
-                    j++;
-                }
-
-                j++;
+                newGrades.add(read);
             }
 
+            //update the course's gradeList using newGrades
+            Predicate<EntryGrade> predicate
+                    = grade -> !grade.isCustom() && !newGrades.contains(grade);
+            grades.removeIf(predicate); //remove all normal grades that are no longer present in the table
+            for (int i = 0; i < newGrades.size(); i++) {
+                EntryGrade entry = newGrades.get(i);
+                if (grades.contains(entry)) {
+                    if (!grades.get(i).equals(entry))
+                        Collections.swap(grades, i, grades.indexOf(entry)); //update ordering by swapping it to the correct spot
+                    //don't do anything if it's already at the correct spot
+                }
+                else
+                    grades.add(i, entry); //add a new one to the correct spot
+            }
+
+            //get actual grade, compare with calculated
             WebElement tail = center.findElement(By.cssSelector("table:nth-child(2) > tbody > tr > td > b"));
             String text = tail.getText();
             System.out.println(text);
-            text = text.substring(0,text.indexOf("("));
-            text = text.substring(text.indexOf(":")+1);
+            text = text.substring(0, text.indexOf("("));
+            text = text.substring(text.indexOf(":") + 1);
             text = text.trim();
             int finalScore = Integer.parseInt(text);
             course.verifySplit(finalScore);

@@ -59,7 +59,7 @@ public final class Bar {
 
         initListener0();
         initListener2();
-        if (grade.isUserDefined()) {
+        if (grade.isCustom()) {
             initListener3();
             initListener4();
             if (grade.getModStatus() == EntryGrade.MANIPULATED)
@@ -82,7 +82,7 @@ public final class Bar {
     private void initListener0() {
         buttons[0].addActionListener(event -> {
             boolean setGray = true;
-            if (grade.isUserDefined()) {
+            if (grade.isCustom()) {
                 setGray = false;
                 if (preventDelete) {
                     JOptionPane.showMessageDialog(null,
@@ -113,7 +113,7 @@ public final class Bar {
         buttons[2].addActionListener(event -> {
 
             JButton[] options;
-            if (!grade.isUserDefined())
+            if (!grade.isCustom())
                 options = WindowUtil.makeButtons("OK", "Reset", "Cancel");
             else
                 options = WindowUtil.makeButtons("OK", "Cancel");
@@ -136,7 +136,7 @@ public final class Bar {
                 grade.setName(field.getText().trim());
                 updateText();
             }
-            else if (choice == 1 && !grade.isUserDefined()) { //Reset option
+            else if (choice == 1 && !grade.isCustom()) { //Reset option
                 grade.resetName();
                 updateText();
             }
@@ -202,7 +202,7 @@ public final class Bar {
     }
 
     public void updateText() {
-        if (grade.isUserDefined()) {
+        if (grade.isCustom()) {
             buttons[1].setText(grade.getModStatus() == Grade.MANIPULATED ? "CONTROL" : "RESPONSE");
         }
         else {
@@ -224,7 +224,7 @@ public final class Bar {
         for (Button button : buttons)
             button.setFontStyle(bold | ital);
 
-        if (!grade.getName().equals(grade.getOriginalName()) && !grade.isUserDefined()) //name has been changed
+        if (!grade.getName().equals(grade.getOriginalName()) && !grade.isCustom()) //name has been changed
             buttons[2].setFontColor((Color) settings.get("color manipulated"));
         else
             buttons[2].setFontColorForLuminance();

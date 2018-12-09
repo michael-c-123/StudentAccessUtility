@@ -59,7 +59,7 @@ public class Course implements Serializable {
             if (match && !grade.isEmpty()) {
                 total += grade.getValue() * grade.getWeight();
                 weight += grade.getWeight();
-                if (!changed && grade.isUserDefined())
+                if (!changed && grade.isCustom())
                     changed = true;
             }
         }
@@ -75,32 +75,6 @@ public class Course implements Serializable {
             else
                 toChange.setValue(score);
         }
-    }
-
-    private double calcActualGrade() {
-        double mTotal = 0, mWeight = 0;
-        double dTotal = 0, dWeight = 0;
-        for (EntryGrade grade : gradeList) {
-            if (!grade.isEmpty() && !grade.isUserDefined())
-                if (grade.isMajor()) {
-                    mTotal += grade.getValue() * grade.getWeight();
-                    mWeight += grade.getWeight();
-                }
-                else {
-                    dTotal += grade.getValue() * grade.getWeight();
-                    dWeight += grade.getWeight();
-                }
-
-        }
-        double grade;
-
-        if (mWeight == 0)
-            grade = dTotal / dWeight * (1 - majorSplit);
-        else if (dWeight == 0)
-            grade = mTotal / mWeight * majorSplit;
-        else
-            grade = mTotal / mWeight * majorSplit + dTotal / dWeight * (1 - majorSplit);
-        return EntryGrade.toPercent(grade);
     }
 
     private boolean hasGradeType(int type) {
@@ -164,15 +138,53 @@ public class Course implements Serializable {
         return gradeList.contains(grade);
     }
 
+    //verify the split between major/daily to see if it adds up
     public void verifySplit(int checkAgainst) {
-        System.out.print("Actual: "+Math.round(calcActualGrade()));
-        System.out.println(" Against: "+checkAgainst);
-        if (Math.round(calcActualGrade()) != checkAgainst) {
-            majorSplit += .1;
-            if (majorSplit >= .9)
-                majorSplit = .6;
-            verifySplit(checkAgainst);
+        int count = 0;
+        double splitTest = majorSplit;
+        boolean match = Math.round(calcActualGradeUsing(splitTest)) == checkAgainst;
+        while (!match && count < 2) {
+            splitTest += .1;
+            if (splitTest >= .9)
+                splitTest = .6;
+            count++;
+            match = Math.round(calcActualGradeUsing(splitTest)) == checkAgainst;
         }
+        if (!match) { //does not match typical splits, must recalculate
+            double majorGrade = calcActualSplit(true);
+            double dailyGrade = calcActualSplit(false);
+            //divide by zero will never occur because major and daily will never be the same
+            splitTest = (checkAgainst - dailyGrade) / (majorGrade - dailyGrade);
+        }
+        majorSplit = splitTest;
+    }
+
+    private double calcActualGradeUsing(double split) {
+        double majorGrade = calcActualSplit(true);
+        double dailyGrade = calcActualSplit(false);
+
+        if (majorGrade == Double.NEGATIVE_INFINITY)
+            return dailyGrade;
+        else if (dailyGrade == Double.NEGATIVE_INFINITY)
+            return majorGrade;
+        else
+            return majorGrade * split + dailyGrade * (1 - split);
+    }
+
+    private double calcActualSplit(boolean isMajor) {
+        double total = 0;
+        double weight = 0;
+        for (EntryGrade grade : gradeList) {
+            boolean match = isMajor == grade.isMajor();
+            if (match && !grade.isEmpty() && !grade.isCustom()) { //add all requested non-empty, non-custom grades
+                total += grade.getValue() * grade.getWeight();
+                weight += grade.getWeight();
+            }
+        }
+        if (weight == 0)
+            return Double.NEGATIVE_INFINITY;
+        else
+            return EntryGrade.toPercent(total / weight);
     }
 
     public void update() {

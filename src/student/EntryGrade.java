@@ -10,8 +10,6 @@ import java.util.Objects;
 public final class EntryGrade extends Grade {
     private static final long serialVersionUID = 0L;
 
-    private final boolean userDefined;
-
     private Calendar date;
     private final String originalName; //note: not used for user defined entries
     private String name;
@@ -27,7 +25,6 @@ public final class EntryGrade extends Grade {
         this.major = major;
         this.weight = weight;
 
-        userDefined = false;
     }
 
     public EntryGrade(int modStatus, String name, boolean major, double weight, double grade) {
@@ -37,11 +34,10 @@ public final class EntryGrade extends Grade {
         this.weight = weight;
 
         setModStatus(modStatus);
-        userDefined = modStatus != NORMAL; //if modStatus is NORMAL then it's not user defined
     }
 
-    public boolean isUserDefined() {
-        return userDefined;
+    public boolean isCustom() {
+        return getModStatus() != NORMAL;
     }
 
     public void setGrayed(boolean grayed) {

@@ -208,7 +208,7 @@ public final class CourseTab extends Button implements Drawable {
         //go thru grade list to find grade that is marked for deletion
         for (int i = 0; i < course.getGradeList().size(); i++) {
             EntryGrade grade = course.getGradeList().get(i);
-            if (grade.isUserDefined() && grade.isGrayed()) {
+            if (grade.isCustom() && grade.isGrayed()) {
                 course.getGradeList().remove(i);
                 Bar removed = gradeBarList.remove(i);
                 for (Button button : removed.getButtons()) {

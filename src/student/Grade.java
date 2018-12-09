@@ -55,7 +55,7 @@ public class Grade implements Serializable {
         return modStatus;
     }
 
-    public void setModStatus(int modStatus) {
+    protected void setModStatus(int modStatus) {
         if (modStatus == MANIPULATED || modStatus == RESPONDING || modStatus == NORMAL)
             this.modStatus = modStatus;
         else
