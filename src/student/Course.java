@@ -32,7 +32,7 @@ public class Course implements Serializable {
         this.period = period;
 
         double split;
-        if (name.contains("\\WAP(\\W|$)"))
+        if (name.matches(".*\\WAP(\\W|$).*") || name.matches(".*\\WDC(\\W|$).*"))
             split = .8;
         else if (name.matches(".*?H$") || name.contains("Pre-AP"))
             split = .7;
@@ -48,6 +48,10 @@ public class Course implements Serializable {
 
     public ArrayList<EntryGrade> getGradeList() {
         return gradeList;
+    }
+
+    public double getMajorSplit() {
+        return majorSplit;
     }
 
     private void calcSplit(boolean isMajor) {

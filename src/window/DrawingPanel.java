@@ -59,6 +59,7 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
 
         for (Course course : profile.getCourses()) {
             addCourse(course);
+            System.out.println(course.getMajorSplit());
         }
 
         //endTEST
