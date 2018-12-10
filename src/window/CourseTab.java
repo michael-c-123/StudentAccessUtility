@@ -73,7 +73,7 @@ public final class CourseTab extends Button implements Drawable {
                 new Rectangle(0, 0, TITLE_HEIGHT, TITLE_HEIGHT),
                 "+", new Font("Arial", Font.BOLD, 24),(Color) settings.get("color dark"),
                 (Button.ButtonPlan) settings.get("style"));
-        addButton.setFontScale(1);
+        addButton.setFontScale(.5);
         addButton.addActionListener(event -> {
             //radio buttons, manip/response
             JRadioButton manipButton = new JRadioButton("Control");
