@@ -147,7 +147,7 @@ public class Profile implements Serializable {
 
     /**
      * Keys for settings: style, color manipulated, color responding, color
-     * normal, scroll sensitivity, grade bar size
+     * normal, color normal, scroll sensitivity, grade bar size
      *
      * @return the settings map
      */
