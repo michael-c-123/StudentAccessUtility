@@ -369,8 +369,6 @@ public class WebAccessor {
                 String gradeString = rowCells.get(4).getText();
                 if (gradeString.equals("-") || gradeString.equalsIgnoreCase("X"))
                     continue;
-                if (rowCells.get(7).getText().equals("0"))
-                    continue;
                 String[] date = rowCells.get(0).getText().split("/");
                 if (gradeString.equalsIgnoreCase("z"))
                     gradeString = "0";
