@@ -150,6 +150,15 @@ public final class CourseTab extends Button implements Drawable {
             }
         });
         addButton.setEnabled(false);
+
+        addButton.setIcon((g, x, y, w, h) -> {
+            g.setColor(Color.WHITE);
+            double weight = .05;
+            g.fillRect((int) (x + w * .2), (int) (y + h * (.5 - weight / 2)),
+                    (int) (w * .6), (int) (h * weight));
+            g.fillRect((int) (x + w * (.5 - weight / 2)), (int) (y + h * .2),
+                    (int) (w * weight), (int) (h * .6));
+        });
     }
 
     private void initEndBarListeners() {
@@ -257,14 +266,6 @@ public final class CourseTab extends Button implements Drawable {
                 vertPosition += SIZE + 1; //+1 for small gaps b/t bars
             }
         }
-    }
-
-    private Bar findBarForGrade(EntryGrade grade) {
-        for (Bar bar : gradeBarList) {
-            if (bar.getGrade() == grade)
-                return bar;
-        }
-        return null;
     }
 
     @Override
