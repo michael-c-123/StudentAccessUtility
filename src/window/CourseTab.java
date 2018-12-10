@@ -71,8 +71,9 @@ public final class CourseTab extends Button implements Drawable {
     private void initAddButton() {
         addButton = new Button(panel,
                 new Rectangle(0, 0, TITLE_HEIGHT, TITLE_HEIGHT),
-                "", (Color) settings.get("color dark"),
+                "+", new Font("Arial", Font.BOLD, 24),(Color) settings.get("color dark"),
                 (Button.ButtonPlan) settings.get("style"));
+        addButton.setFontScale(1);
         addButton.addActionListener(event -> {
             //radio buttons, manip/response
             JRadioButton manipButton = new JRadioButton("Control");
@@ -151,14 +152,15 @@ public final class CourseTab extends Button implements Drawable {
         });
         addButton.setEnabled(false);
 
-        addButton.setIcon((g, x, y, w, h) -> {
-            g.setColor(Color.WHITE);
-            double weight = .05;
-            g.fillRect((int) (x + w * .2), (int) (y + h * (.5 - weight / 2)),
-                    (int) (w * .6), (int) (h * weight));
-            g.fillRect((int) (x + w * (.5 - weight / 2)), (int) (y + h * .2),
-                    (int) (w * weight), (int) (h * .6));
-        });
+//        addButton.setIcon((g, x, y, w, h) -> {
+//            g.setColor(Color.WHITE);
+//            double weight = .05;
+//            g.fillRect((int) (x + w * .2), (int) (y + h * (.5 - weight / 2)),
+//                    (int) (w * .6), (int) (h * weight));
+//            g.fillRect((int) (x + w * (.5 - weight / 2)), (int) (y + h * .2),
+//                    (int) (w * weight), (int) (h * .6));
+//        });
+
     }
 
     private void initEndBarListeners() {
