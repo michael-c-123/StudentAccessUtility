@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author Michael
  */
-public class Course implements Serializable {
+public class Course implements Serializable, Comparable<Course> {
     private static final long serialVersionUID = 0L;
     private static final double TEST_SPLIT = .15;
 
@@ -324,5 +324,12 @@ public class Course implements Serializable {
     public String toString() {
         return "Course{" + "name=" + name + ", period=" + period + ", exam=" + exam + ", m1=" + m1 + ", m2=" + m2 + ", sem=" + sem + ", major=" + major + ", daily=" + daily + ", majorSplit=" + majorSplit + ", onM1=" + onM1 + '}';
     }
+
+    @Override
+    public int compareTo(Course other) {
+        return period - other.period;
+    }
+
+
 
 }

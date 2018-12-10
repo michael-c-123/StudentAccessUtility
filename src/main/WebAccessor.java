@@ -139,6 +139,7 @@ public class WebAccessor {
             driver.switchTo().frame("main");
             updateReportCard(driver, profile); //fill out courses for profile
             updateClassWork(driver, profile); //get grades from each class
+            Collections.sort(profile.getCourses());
         }
         catch (WebDriverException e) {  //brower closed
 //            e.printStackTrace();
@@ -190,6 +191,7 @@ public class WebAccessor {
             try {
                 updateReportCard(driver, profile);
                 updateClassWork(driver, profile);
+                Collections.sort(profile.getCourses());
             }
             catch (NoSuchElementException e) {
                 System.err.println("TEST: failed to get grades.");
@@ -368,6 +370,8 @@ public class WebAccessor {
                 List<WebElement> rowCells = rows.get(i).findElements(By.tagName("td"));
                 String gradeString = rowCells.get(4).getText();
                 if (gradeString.equals("-") || gradeString.equalsIgnoreCase("X"))
+                    continue;
+                if (gradeString.equals("0.00") && rowCells.get(7).getText().equals("0"))
                     continue;
                 String[] date = rowCells.get(0).getText().split("/");
                 if (gradeString.equalsIgnoreCase("z"))

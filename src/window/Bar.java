@@ -229,6 +229,9 @@ public final class Bar {
         else
             buttons[2].setFontColorForLuminance();
 
+        if (!grade.isCustom() && grade.getValue() < 2.0 && grade.getValue() != Grade.NO_VALUE)
+            buttons[5].setFontColor(Color.RED);
+
     }
 
     public void draw(Graphics g) {
