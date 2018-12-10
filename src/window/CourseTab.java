@@ -70,7 +70,7 @@ public final class CourseTab extends Button implements Drawable {
 
     private void initAddButton() {
         addButton = new Button(panel,
-                new Rectangle(0, 0, TITLE_HEIGHT, TITLE_HEIGHT),
+                new Rectangle(0, 0, TITLE_HEIGHT*2/3, TITLE_HEIGHT*2/3),
                 "+", new Font("Arial", Font.BOLD, 24),(Color) settings.get("color dark"),
                 (Button.ButtonPlan) settings.get("style"));
         addButton.setFontScale(.5);
@@ -310,7 +310,7 @@ public final class CourseTab extends Button implements Drawable {
         labelBar.setX(x);
         labelBar.setW(w);
 
-        addButton.setX(x);
+        addButton.setX(panel.getWidth() - addButton.getRect().width);
 
         for (Bar bar : gradeBarList)
             bar.draw(g);
