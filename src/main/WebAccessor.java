@@ -388,7 +388,7 @@ public class WebAccessor {
             for (int i = 0; i < newGrades.size(); i++) {
                 EntryGrade entry = newGrades.get(i);
                 if (grades.contains(entry)) {
-                    if (!grades.get(i).equals(entry))
+                    if (i < grades.size() && !grades.get(i).equals(entry))
                         Collections.swap(grades, i, grades.indexOf(entry)); //update ordering by swapping it to the correct spot
                     //don't do anything if it's already at the correct spot
                 }

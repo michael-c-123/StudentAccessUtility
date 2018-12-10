@@ -143,8 +143,13 @@ public final class EntryGrade extends Grade {
             return false;
         if (Double.doubleToLongBits(this.weight) != Double.doubleToLongBits(other.weight))
             return false;
-        return Objects.equals(this.originalName, other.originalName);
+        if (!Objects.equals(this.originalName, other.originalName))
+            return false;
+        return Objects.equals(this.date, other.date);
     }
+
+
+
 
 
 }
