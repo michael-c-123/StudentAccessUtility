@@ -75,7 +75,7 @@ public class WebAccessor {
         OPTIONS.addArguments("--ignore-certificate-errors");
         OPTIONS.addArguments("--disable-extensions"); // disabling extensions
 
-        OPTIONS.addArguments("user-data-dir=C:\\Users\\Michael\\AppData\\Local\\Google\\Chrome\\User Data");
+        OPTIONS.addArguments("user-data-dir=C:\\Users\\Michael\\AppData\\Local\\Google\\Chrome\\Automation");
 //        OPTIONS.addArguments("user-data-dir=C:\\Users\\Michael\\Desktop");
 //        OPTIONS.addArguments("profile-directory=".concat("Default"));
         OPTIONS.addArguments("--disable-plugins");

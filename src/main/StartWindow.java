@@ -275,6 +275,8 @@ public final class StartWindow extends javax.swing.JFrame {
     private void logInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logInButtonActionPerformed
         try {
             WebAccessor.studentAccess(profile);
+            dispose();
+            new MainWindow(profile).showFrame();
         }
         catch (InterruptedException ex) {
             Logger.getLogger(StartWindow.class.getName()).log(Level.SEVERE, null, ex);
