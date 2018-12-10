@@ -29,7 +29,7 @@ import student.Grade;
  * @author Michael
  */
 public final class CourseTab extends Button implements Drawable {
-    private static final int TITLE_HEIGHT = 50; //how much space the title heading takes up
+    public static final int TITLE_HEIGHT = 50; //how much space the title heading takes up
     private final Bar labelBar;
     private final Bar endBar;
     private ArrayList<Bar> gradeBarList;
@@ -283,11 +283,11 @@ public final class CourseTab extends Button implements Drawable {
 
     @Override
     public void drawUsing(Graphics g, DrawingPanel panel, boolean sidebarOn) {
-        //FIXME refractor to separate into helper method updateText() (which updates position, etc) and drawing stuff only in this method
+        //FIXME refractor to separate into helper method update() (which updates position, etc) and drawing stuff only in this method
         int x, w;
         if (sidebarOn) {
-            x = panel.getWidth() / 4 + 1;
-            w = panel.getWidth() * 3 / 4;
+            x = (int)(panel.getWidth() *Sidebar.SIZE_RATIO) + 1;
+            w = (int)(panel.getWidth() * (1-Sidebar.SIZE_RATIO));
         }
         else {
             x = 0;

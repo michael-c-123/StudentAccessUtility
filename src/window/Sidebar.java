@@ -13,7 +13,8 @@ import java.util.List;
  */
 public class Sidebar implements Drawable {
     private List<Button> buttonList;
-    public static final int SIDEBAR_BUTTON_SIZE = 30;
+    public static final int BUTTON_SIZE = 30;
+    public static final double SIZE_RATIO = .2;
 
     public Sidebar(){
         buttonList = new ArrayList<>();
@@ -25,7 +26,7 @@ public class Sidebar implements Drawable {
             return;
 
         //update position
-        int w = panel.getWidth() / 4;
+        int w = (int) (panel.getWidth() *SIZE_RATIO);
         for (Button button : buttonList) {
             button.setEnabled(sidebarOn);
             button.setRect(new Rectangle(button.getRect().x, button.getRect().y, w, button.getRect().height));
@@ -33,7 +34,7 @@ public class Sidebar implements Drawable {
 
         //draw
         g.setColor(Color.DARK_GRAY.darker());
-        g.fillRect(0, 0, panel.getWidth() / 4, panel.getHeight()); //one fourth of screen
+        g.fillRect(0, 0, (int) (panel.getWidth() *SIZE_RATIO), panel.getHeight()); //one fourth of screen
         for (Button button : buttonList)
             button.draw(g);
     }
@@ -43,7 +44,7 @@ public class Sidebar implements Drawable {
     }
 
     public void addButton(Button button) {
-        button.setRect(new Rectangle(0, buttonList.size() * (SIDEBAR_BUTTON_SIZE + 1), 0, SIDEBAR_BUTTON_SIZE)); //0 placeholder for width
+        button.setRect(new Rectangle(0, buttonList.size() * (BUTTON_SIZE + 1), 0, BUTTON_SIZE)); //0 placeholder for width
         buttonList.add(button);
         buttonList = Button.groupButtons(buttonList);
     }
