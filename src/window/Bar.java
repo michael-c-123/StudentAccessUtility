@@ -29,6 +29,18 @@ public final class Bar {
     private Map<String, Object> settings;
     private boolean[] enabledStatuses = new boolean[6];
 
+    private static final Button.Icon DELETE = (g, x, y, w, h) -> {
+        g.drawLine(x + w / 4, y + w / 4, x + w * 3 / 4, y + w * 3 / 4); //top left - bottom right
+        g.drawLine(x + w / 4, y + w * 3 / 4, x + w * 3 / 4, y + w / 4); //bottom left - top right
+    };
+    private static final Button.Icon HIDDEN = (g, x, y, w, h) -> {
+        g.drawOval(x + w / 4, y + w / 4, w / 2, w / 2); //circle
+        g.drawLine(x + w / 4, y + w * 3 / 4, x + w * 3 / 4, y + w / 4); //bottom left - top right
+    };
+    private static final Button.Icon SHOWN = (g, x, y, w, h) -> {
+        g.drawOval(x + w / 4, y + w / 4, w / 2, w / 2); //circle
+    };
+
     public Bar(String[] text, JPanel panel, Map<String, Object> settings) {
         buttons = new Button[6]; //gray, date, name, weight, major, grade
         //initialize accordingly
@@ -54,6 +66,17 @@ public final class Bar {
         buttons = new Button[6]; //gray, date, name, weight, major, grade
         for (int i = 0; i < buttons.length; i++)
             buttons[i] = new Button(panel, new Rectangle(), "", barColor, (ButtonPlan) settings.get("style"));
+//        char c = grade.isCustom() ? 'X' : '\u25ef';
+//        buttons[0].setText(""+c);
+//        buttons[0].setFont(new Font("Courier", Font.BOLD, 12));
+        Button.Icon icon;
+        if (grade.isCustom())
+            icon = DELETE;
+        else if (grade.isGrayed())
+            icon = HIDDEN;
+        else
+            icon = SHOWN;
+        buttons[0].setIcon(icon);
 
         updateText();
 
@@ -86,7 +109,7 @@ public final class Bar {
                 setGray = false;
                 if (preventDelete) {
                     JOptionPane.showMessageDialog(null,
-                        "You cannot delete this grade while the Current Grade is controlled.", "Deadlock", JOptionPane.WARNING_MESSAGE);
+                            "You cannot delete this grade while the Current Grade is controlled.", "Deadlock", JOptionPane.WARNING_MESSAGE);
                 }
                 else {
                     int option = JOptionPane.showConfirmDialog(null,
@@ -221,8 +244,14 @@ public final class Bar {
 
         int bold = grade.isMajor() ? Font.BOLD : Font.PLAIN;
         int ital = grade.isGrayed() ? Font.ITALIC : Font.PLAIN;
-        for (Button button : buttons)
-            button.setFontStyle(bold | ital);
+        for (int i = 0; i < buttons.length; i++) {
+            Button button = buttons[i];
+            if (i != 0)
+                button.setFontStyle(bold | ital);
+        }
+
+        if (!grade.isCustom())
+            buttons[0].setIcon(grade.isGrayed() ? HIDDEN : SHOWN);
 
         if (!grade.getName().equals(grade.getOriginalName()) && !grade.isCustom()) //name has been changed
             buttons[2].setFontColor((Color) settings.get("color manipulated"));

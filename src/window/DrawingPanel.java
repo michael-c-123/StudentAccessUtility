@@ -27,15 +27,15 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
     private Sidebar sidebar; //TODO finish sidebar
     private boolean sidebarOn;
     private Button sidebarButton;
-    private Button.Icon left = (g, x, y, w, h) -> {
+    private static final Button.Icon LEFT = (g, x, y, w, h) -> {
         g.setColor(Color.GRAY);
         int[] xs = {x + w / 8, x + w / 8, x + w * 7 / 8};
         int[] ys = {y + h / 8, y + h * 7 / 8, y + h / 2};
         g.fillPolygon(xs, ys, 3);
     };
-    private Button.Icon right = (g, x, y, w, h) -> {
+    private static final Button.Icon RIGHT = (g, x, y, w, h) -> {
         g.setColor(Color.GRAY);
-        int[] xs = {x + w * 7 / 8, x + w* 7 / 8, x + w / 8};
+        int[] xs = {x + w * 7 / 8, x + w * 7 / 8, x + w / 8};
         int[] ys = {y + h / 8, y + h * 7 / 8, y + h / 2};
         g.fillPolygon(xs, ys, 3);
     };
@@ -49,7 +49,7 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
         sidebarButton = new Button(this,
                 new Rectangle(0, 0, CourseTab.TITLE_HEIGHT, CourseTab.TITLE_HEIGHT),
                 "", (Color) profile.getSettings().get("color dark"), Button.STANDARD);
-        sidebarButton.setIcon(left);
+        sidebarButton.setIcon(LEFT);
 
         for (Course course : profile.getCourses()) {
             addCourse(course);
@@ -103,8 +103,6 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
             sidebar.getButtonList().get(0).doClick();
         else
             tab.setActive(false);
-
-        //TODO find the m1 grade if currently on m2 (do this before this method is called)
     }
 
     private void changePage(Drawable page) {
@@ -120,11 +118,11 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
         sidebar.setEnabled(sidebarOn);
         if (sidebarOn) {
             sidebarButton.setX((int) (Sidebar.SIZE_RATIO * getWidth()) + 1);
-            sidebarButton.setIcon(right);
+            sidebarButton.setIcon(RIGHT);
         }
         else {
             sidebarButton.setX(0);
-            sidebarButton.setIcon(left);
+            sidebarButton.setIcon(LEFT);
         }
         repaint();
     }

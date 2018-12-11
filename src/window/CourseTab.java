@@ -35,6 +35,7 @@ public final class CourseTab extends Button implements Drawable {
     private ArrayList<Bar> gradeBarList;
 
     private Button addButton;
+    private Button infoButton;
 
     private Course course;
     private Map<String, Object> settings;
@@ -60,6 +61,7 @@ public final class CourseTab extends Button implements Drawable {
         initEndBarListeners();
 
         initAddButton();
+        initInfoButton();
 
         for (EntryGrade entryGrade : course.getGradeList()) {
             addGrade(entryGrade);
@@ -70,8 +72,8 @@ public final class CourseTab extends Button implements Drawable {
 
     private void initAddButton() {
         addButton = new Button(panel,
-                new Rectangle(0, 0, TITLE_HEIGHT*2/3, TITLE_HEIGHT*2/3),
-                "+", new Font("Arial", Font.BOLD, 24),(Color) settings.get("color dark"),
+                new Rectangle(0, 0, TITLE_HEIGHT * 2 / 3, TITLE_HEIGHT * 2 / 3),
+                "+", new Font("Arial", Font.BOLD, 24), (Color) settings.get("color dark"),
                 (Button.ButtonPlan) settings.get("style"));
         addButton.setFontScale(.5);
         addButton.addActionListener(event -> {
@@ -152,15 +154,19 @@ public final class CourseTab extends Button implements Drawable {
         });
         addButton.setEnabled(false);
 
-//        addButton.setIcon((g, x, y, w, h) -> {
-//            g.setColor(Color.WHITE);
-//            double weight = .05;
-//            g.fillRect((int) (x + w * .2), (int) (y + h * (.5 - weight / 2)),
-//                    (int) (w * .6), (int) (h * weight));
-//            g.fillRect((int) (x + w * (.5 - weight / 2)), (int) (y + h * .2),
-//                    (int) (w * weight), (int) (h * .6));
-//        });
+    }
 
+    private void initInfoButton() {
+        infoButton = new Button(panel,
+                new Rectangle(0, 0, TITLE_HEIGHT * 2 / 3, TITLE_HEIGHT * 2 / 3),
+                "i", new Font("Courier New", Font.BOLD, 24), (Color) settings.get("color dark"),
+                (Button.ButtonPlan) settings.get("style")
+        );
+        infoButton.setFontScale(.5);
+        infoButton.addActionListener(event -> {
+            //TODO
+        });
+        infoButton.setEnabled(false);
     }
 
     private void initEndBarListeners() {
@@ -279,6 +285,7 @@ public final class CourseTab extends Button implements Drawable {
             button.setVisible(active);
         }
         addButton.setEnabled(active);
+        infoButton.setEnabled(active);
     }
 
     @Override
@@ -286,8 +293,8 @@ public final class CourseTab extends Button implements Drawable {
         //FIXME refractor to separate into helper method update() (which updates position, etc) and drawing stuff only in this method
         int x, w;
         if (sidebarOn) {
-            x = (int)(panel.getWidth() *Sidebar.SIZE_RATIO) + 1;
-            w = (int)(panel.getWidth() * (1-Sidebar.SIZE_RATIO));
+            x = (int) (panel.getWidth() * Sidebar.SIZE_RATIO) + 1;
+            w = (int) (panel.getWidth() * (1 - Sidebar.SIZE_RATIO));
         }
         else {
             x = 0;
@@ -311,6 +318,7 @@ public final class CourseTab extends Button implements Drawable {
         labelBar.setW(w);
 
         addButton.setX(panel.getWidth() - addButton.getRect().width);
+        infoButton.setX(panel.getWidth() - addButton.getRect().width*2-1);
 
         for (Bar bar : gradeBarList)
             bar.draw(g);
@@ -327,6 +335,7 @@ public final class CourseTab extends Button implements Drawable {
         WindowUtil.drawCenteredString(g, course.getName(), x, 0, w, TITLE_HEIGHT);
 
         addButton.draw(g);
+        infoButton.draw(g);
 
         //TODO draw other stuff here
     }

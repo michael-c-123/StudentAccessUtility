@@ -1,6 +1,8 @@
 
 package main;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -12,7 +14,10 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -74,8 +79,16 @@ public class WebAccessor {
         OPTIONS.addArguments("--disable-infobars");
         OPTIONS.addArguments("--ignore-certificate-errors");
         OPTIONS.addArguments("--disable-extensions"); // disabling extensions
-
-        OPTIONS.addArguments("user-data-dir=C:\\Users\\Michael\\AppData\\Local\\Google\\Chrome\\Automation");
+        String path = "";
+        try {
+            Scanner sc = new Scanner(new File("userdatapath.dat"));
+            if (sc.hasNextLine())
+                path = sc.nextLine();
+        }
+        catch (FileNotFoundException ex) {
+            Logger.getLogger(WebAccessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        OPTIONS.addArguments("user-data-dir="+path);
 //        OPTIONS.addArguments("user-data-dir=C:\\Users\\Michael\\Desktop");
 //        OPTIONS.addArguments("profile-directory=".concat("Default"));
         OPTIONS.addArguments("--disable-plugins");
@@ -371,11 +384,11 @@ public class WebAccessor {
                 String gradeString = rowCells.get(4).getText();
                 if (gradeString.equals("-") || gradeString.equalsIgnoreCase("X"))
                     continue;
-                if (gradeString.equals("0.00") && rowCells.get(7).getText().equals("0"))
+                if (rowCells.get(7).getText().equals("0"))
                     continue;
-                String[] date = rowCells.get(0).getText().split("/");
-                if (gradeString.equalsIgnoreCase("z"))
+                if (gradeString.equalsIgnoreCase("Z"))
                     gradeString = "0";
+                String[] date = rowCells.get(0).getText().split("/");
                 EntryGrade read = new EntryGrade(
                         new GregorianCalendar(Integer.parseInt(date[2]), Integer.parseInt(date[0]) - 1, Integer.parseInt(date[1])),
                         rowCells.get(2).getText(),
