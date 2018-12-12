@@ -118,22 +118,27 @@ public class Course implements Serializable, Comparable<Course> {
 
     //verify the split between major/daily to see if it adds up
     public void verifySplit(int checkAgainst) {
-        int count = 0;
         double splitTest = majorSplit;
         boolean match = Math.round(calcActualGradeUsing(splitTest)) == checkAgainst;
-        while (!match && count < 2) {
-            splitTest += .1;
-            if (splitTest >= .9)
-                splitTest = .6;
-            count++;
+        if (match)
+            return;
+
+        for (int percent = 60; percent <= 80 && !match; percent += 10) {
+            splitTest = percent / 100.0; //prevents roundoff errors
             match = Math.round(calcActualGradeUsing(splitTest)) == checkAgainst;
         }
+        for (int percent = 50; percent <= 90 && !match; percent += 5) {
+            splitTest = percent / 100.0;
+            match = Math.round(calcActualGradeUsing(splitTest)) == checkAgainst;
+        }
+
         if (!match) { //does not match typical splits, must recalculate
             double majorGrade = calcActualSplit(true);
             double dailyGrade = calcActualSplit(false);
             //divide by zero will never occur because major and daily will never be the same
             splitTest = (checkAgainst - dailyGrade) / (majorGrade - dailyGrade);
         }
+
         majorSplit = splitTest;
     }
 
