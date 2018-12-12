@@ -267,18 +267,16 @@ public class EditProfileWindow extends javax.swing.JFrame {
 
     private void editButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editButtonActionPerformed
         setEnabled(false);
-        Profile temp = profile;
-        profile = WebAccessor.createNewProfile();
+        Profile newlyCreated = WebAccessor.createNewProfile();
 
-        if (profile != null) { //successful profile update thru SAC
+        if (newlyCreated != null) { //successful profile update thru SAC (no close or error)
+            profile = newlyCreated;
             updateInfoDisplay();
             doneButton.setEnabled(true);
-            System.out.println("TEST: changed");
+            changed = true;
+            System.out.println("changed");
         }
-        else //closed or failed SAC profle update
-            profile = temp;
 
-        //FIXME save the other data from `temp` into the new `profile`
         //focus stuff
         setEnabled(true);
 
@@ -290,11 +288,20 @@ public class EditProfileWindow extends javax.swing.JFrame {
     private void doneButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_doneButtonActionPerformed
         profile.setLocked(passwordCheckbox.isSelected());   //use checkbox to set if profile is protected
 
-        window.setProfile(profile); //put the new profile into the start window
-        System.out.println("TEST:" + profile);
-        window.setVisible(true); //make it visible
-        window.requestFocus(); //make it on top
-        dispose(); //get rid of this window
+        int confirm = JOptionPane.YES_OPTION;
+        if (changed && window.getProfile()!=null) {
+            String oldName = window.getProfile().getField(0);
+            confirm = JOptionPane.showConfirmDialog(null, "Are you sure? The previous profile \""
+                    + oldName+ "\" and all customizations will be overwritten.", "Confirm Overwrite", JOptionPane.YES_NO_OPTION);
+        }
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            window.setProfile(profile); //put the new profile into the start window
+            System.out.println("set as active: " + profile);
+            window.setVisible(true); //make it visible
+            window.requestFocus(); //make it on top
+            dispose(); //get rid of this window
+        }
     }//GEN-LAST:event_doneButtonActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
@@ -304,7 +311,8 @@ public class EditProfileWindow extends javax.swing.JFrame {
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         int confirm = JOptionPane.YES_OPTION;
         if (changed)
-            confirm = JOptionPane.showConfirmDialog(null, "Are you sure?", "Confirm Cancel", JOptionPane.YES_NO_OPTION);
+            confirm = JOptionPane.showConfirmDialog(null, "Are you sure? The new"
+                    + " profile you created will be lost.", "Confirm Cancel", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             dispose();

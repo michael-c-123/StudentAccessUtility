@@ -1,1 +1,0 @@
-{"net":{"http_server_properties":{"servers":[{"https://accounts.google.com":{"supports_spdy":true}},{"https://translate.google.com":{"supports_spdy":true}},{"https://translate.googleapis.com":{"supports_spdy":true}},{"https://www.gstatic.com":{"supports_spdy":true}},{"https://www.google.com":{"supports_spdy":true}}],"version":5}}}

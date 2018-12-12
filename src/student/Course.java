@@ -125,11 +125,15 @@ public class Course implements Serializable, Comparable<Course> {
 
         for (int percent = 60; percent <= 80 && !match; percent += 10) {
             splitTest = percent / 100.0; //prevents roundoff errors
-            match = Math.round(calcActualGradeUsing(splitTest)) == checkAgainst;
+            double splitCalc = calcActualGradeUsing(splitTest);
+            match = Math.ceil(splitCalc) == checkAgainst;
+            System.out.println(name + " matches " + splitTest + ": " + splitCalc);
         }
         for (int percent = 50; percent <= 90 && !match; percent += 5) {
             splitTest = percent / 100.0;
-            match = Math.round(calcActualGradeUsing(splitTest)) == checkAgainst;
+            double splitCalc = calcActualGradeUsing(splitTest);
+            match = Math.ceil(splitCalc) == checkAgainst;
+            System.out.println(name + " matches " + splitTest + ": " + splitCalc);
         }
 
         if (!match) { //does not match typical splits, must recalculate
