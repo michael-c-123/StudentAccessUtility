@@ -243,7 +243,7 @@ public final class Bar {
             buttons[5].setText(String.format("%.2f", grade.getValue()));
 
         int bold = grade.isMajor() ? Font.BOLD : Font.PLAIN;
-        int ital = grade.isGrayed() ? Font.ITALIC : Font.PLAIN;
+        int ital = grade.isExtra()? Font.ITALIC : Font.PLAIN;
         for (int i = 0; i < buttons.length; i++) {
             Button button = buttons[i];
             if (i != 0)

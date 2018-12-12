@@ -88,7 +88,7 @@ public class WebAccessor {
         catch (FileNotFoundException ex) {
             Logger.getLogger(WebAccessor.class.getName()).log(Level.SEVERE, null, ex);
         }
-        OPTIONS.addArguments("user-data-dir="+path);
+        OPTIONS.addArguments("user-data-dir=" + path);
 //        OPTIONS.addArguments("user-data-dir=C:\\Users\\Michael\\Desktop");
 //        OPTIONS.addArguments("profile-directory=".concat("Default"));
         OPTIONS.addArguments("--disable-plugins");
@@ -151,7 +151,7 @@ public class WebAccessor {
                     Integer.parseInt(fields[6]));
             driver.switchTo().frame("main");
             updateReportCard(driver, profile); //fill out courses for profile
-            updateClassWork(driver, profile); //get grades from each class
+            updateClassWork(driver, profile, true); //get grades from each class
             Collections.sort(profile.getCourses());
         }
         catch (WebDriverException e) {  //brower closed
@@ -203,7 +203,7 @@ public class WebAccessor {
             driver.switchTo().frame("main");    //go to the SAC frame
             try {
                 updateReportCard(driver, profile);
-                updateClassWork(driver, profile);
+                updateClassWork(driver, profile, false);
                 Collections.sort(profile.getCourses());
             }
             catch (NoSuchElementException e) {
@@ -343,7 +343,7 @@ public class WebAccessor {
         }
     }
 
-    private static void updateClassWork(WebDriver driver, Profile profile) {
+    private static void updateClassWork(WebDriver driver, Profile profile, boolean verify) {
         try {
             WebElement workTab = driver.findElement(By.xpath("//*[text()[contains(.,'Work')]]"));
             workTab.click();
@@ -356,7 +356,7 @@ public class WebAccessor {
                 course.setOnM1(markingPeriod % 2 != 0); //1 or 3 means set to M1
             }
             WebElement center = driver.findElement(By.cssSelector("body > center:nth-child(7) > center"));
-            recursiveNavigateTables(profile, center);
+            recursiveNavigateTables(profile, center, verify);
 
         }
         catch (NoSuchElementException e) {
@@ -364,7 +364,7 @@ public class WebAccessor {
         }
     }
 
-    public static void recursiveNavigateTables(Profile profile, WebElement center) {
+    public static void recursiveNavigateTables(Profile profile, WebElement center, boolean verify) {
         WebElement head = center.findElement(By.cssSelector("table:nth-child(1) > tbody > tr:nth-child(1)"));
         WebElement gradeTable = center.findElement(By.cssSelector("table:nth-child(1) > tbody > tr:nth-child(2) > td > table > tbody"));
 
@@ -384,8 +384,8 @@ public class WebAccessor {
                 String gradeString = rowCells.get(4).getText();
                 if (gradeString.equals("-") || gradeString.equalsIgnoreCase("X"))
                     continue;
-                if (rowCells.get(7).getText().equals("0"))
-                    continue;
+                boolean extra = rowCells.get(7).getText().equals("0");
+
                 if (gradeString.equalsIgnoreCase("Z"))
                     gradeString = "0";
                 String[] date = rowCells.get(0).getText().split("/");
@@ -395,6 +395,7 @@ public class WebAccessor {
                         rowCells.get(3).getText().equalsIgnoreCase("Major"),
                         Double.parseDouble(rowCells.get(5).getText()),
                         Double.parseDouble(gradeString));
+                read.setExtra(extra);
                 newGrades.add(read);
             }
 
@@ -421,14 +422,16 @@ public class WebAccessor {
             text = text.substring(text.indexOf(":") + 1);
             text = text.trim();
             int finalScore = Integer.parseInt(text);
-            course.verifySplit(finalScore);
+            if (verify)
+                course.verifySplit(finalScore);
+            course.setActualEstimate(finalScore);
         }
         else
             throw new IllegalStateException("No such course: " + headTitle);
 
         List<WebElement> cenList = center.findElements(By.cssSelector("center"));
         if (!cenList.isEmpty())
-            recursiveNavigateTables(profile, cenList.get(0));
+            recursiveNavigateTables(profile, cenList.get(0), verify);
     }
 
     private static ExpectedCondition<Boolean> fieldsChanged(WebDriver driver, String[] fields) throws NoSuchWindowException {

@@ -17,6 +17,7 @@ public final class EntryGrade extends Grade {
     private double weight;
 
     private boolean grayed;
+    private boolean extra;
 
     public EntryGrade(Calendar date, String name, boolean major, double weight, double grade) {
         super(grade);
@@ -24,7 +25,6 @@ public final class EntryGrade extends Grade {
         this.name = originalName = name;
         this.major = major;
         this.weight = weight;
-
     }
 
     public EntryGrade(int modStatus, String name, boolean major, double weight, double grade) {
@@ -105,6 +105,14 @@ public final class EntryGrade extends Grade {
     @Override
     public void reset() {
         throw new IllegalStateException("Entry grades cannot be reset.");
+    }
+
+    public boolean isExtra() {
+        return extra;
+    }
+
+    public void setExtra(boolean extra) {
+        this.extra = extra;
     }
 
     public static double toFivePointScale(double percent) {

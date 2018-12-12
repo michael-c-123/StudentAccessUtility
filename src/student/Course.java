@@ -19,6 +19,7 @@ public class Course implements Serializable, Comparable<Course> {
     private Grade major, daily;
     private double majorSplit;
     private boolean onM1 = true;
+    private int actualEstimate;
 
     public Course(String name, int period) {
         this.name = name;
@@ -34,7 +35,7 @@ public class Course implements Serializable, Comparable<Course> {
         double split;
         if (name.matches(".*\\WAP(\\W|$).*") || name.matches(".*\\WDC(\\W|$).*"))
             split = .8;
-        else if (name.matches(".*?H$") || name.contains("Pre-AP"))
+        else if (name.matches(".*?H$") || name.contains("PreAP"))
             split = .7;
         else
             split = .6;
@@ -52,33 +53,6 @@ public class Course implements Serializable, Comparable<Course> {
 
     public double getMajorSplit() {
         return majorSplit;
-    }
-
-    private void calcSplit(boolean isMajor) {
-        double total = 0;
-        double weight = 0;
-        boolean changed = false;
-        for (EntryGrade grade : gradeList) {
-            boolean match = isMajor == grade.isMajor();
-            if (match && !grade.isEmpty()) {
-                total += grade.getValue() * grade.getWeight();
-                weight += grade.getWeight();
-                if (!changed && grade.isCustom())
-                    changed = true;
-            }
-        }
-        Grade toChange = isMajor ? major : daily;
-        toChange.reset();
-        if (weight == 0)
-            toChange.setValue(Grade.NO_VALUE);
-        else {
-            double score = total / weight;
-            score = EntryGrade.toPercent(score);
-            if (changed)
-                toChange.react(score);
-            else
-                toChange.setValue(score);
-        }
     }
 
     private boolean hasGradeType(int type) {
@@ -182,13 +156,42 @@ public class Course implements Serializable, Comparable<Course> {
             boolean match = isMajor == grade.isMajor();
             if (match && !grade.isEmpty() && !grade.isCustom()) { //add all requested non-empty, non-custom grades
                 total += grade.getValue() * grade.getWeight();
-                weight += grade.getWeight();
+                if (!grade.isExtra())
+                    weight += grade.getWeight();
             }
         }
         if (weight == 0)
             return Double.NEGATIVE_INFINITY;
         else
             return EntryGrade.toPercent(total / weight);
+    }
+
+    private void calcSplit(boolean isMajor) {
+        double total = 0;
+        double weight = 0;
+        boolean changed = false;
+        for (EntryGrade grade : gradeList) {
+            boolean match = isMajor == grade.isMajor();
+            if (match && !grade.isEmpty()) {
+                total += grade.getValue() * grade.getWeight();
+                if (!grade.isExtra())
+                    weight += grade.getWeight();
+                if (!changed && grade.isCustom())
+                    changed = true;
+            }
+        }
+        Grade toChange = isMajor ? major : daily;
+        toChange.reset();
+        if (weight == 0)
+            toChange.setValue(Grade.NO_VALUE);
+        else {
+            double score = total / weight;
+            score = EntryGrade.toPercent(score);
+            if (changed)
+                toChange.react(score);
+            else
+                toChange.setValue(score);
+        }
     }
 
     public void update() {
@@ -320,6 +323,14 @@ public class Course implements Serializable, Comparable<Course> {
         }
     }
 
+    public int getActualEstimate() {
+        return actualEstimate;
+    }
+
+    public void setActualEstimate(int actualEstimate) {
+        this.actualEstimate = actualEstimate;
+    }
+
     @Override
     public String toString() {
         return "Course{" + "name=" + name + ", period=" + period + ", exam=" + exam + ", m1=" + m1 + ", m2=" + m2 + ", sem=" + sem + ", major=" + major + ", daily=" + daily + ", majorSplit=" + majorSplit + ", onM1=" + onM1 + '}';
@@ -329,7 +340,5 @@ public class Course implements Serializable, Comparable<Course> {
     public int compareTo(Course other) {
         return period - other.period;
     }
-
-
 
 }
