@@ -44,12 +44,20 @@ public class Course implements Serializable, Comparable<Course> {
         return name;
     }
 
+    public int getPeriod() {
+        return period;
+    }
+
     public ArrayList<EntryGrade> getGradeList() {
         return gradeList;
     }
 
     public double getMajorSplit() {
         return majorSplit;
+    }
+
+    public void setMajorSplit(double majorSplit) {
+        this.majorSplit = majorSplit;
     }
 
     private boolean hasGradeType(int type) {
@@ -147,7 +155,7 @@ public class Course implements Serializable, Comparable<Course> {
         majorSplit = splitTest;
     }
 
-    private double calcActualGradeUsing(double split) {
+    public double calcActualGradeUsing(double split) {
         double majorGrade = calcActualSplit(true);
         double dailyGrade = calcActualSplit(false);
 
@@ -340,6 +348,8 @@ public class Course implements Serializable, Comparable<Course> {
     public void setActualEstimate(int actualEstimate) {
         this.actualEstimate = actualEstimate;
     }
+
+
 
     @Override
     public String toString() {

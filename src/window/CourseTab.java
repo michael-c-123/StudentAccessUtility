@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import main.InfoPanel;
 import main.WindowUtil;
 import student.Course;
 import student.EntryGrade;
@@ -140,7 +141,7 @@ public final class CourseTab extends Button implements Drawable {
                     "Create New Grade", //title
                     JOptionPane.DEFAULT_OPTION, //option type
                     JOptionPane.PLAIN_MESSAGE, //message type
-                    null, options, null); //icon, options, initial value
+                    null, options, options[0]); //icon, options, initial value
 
             if (option == 0) { //OK button clicked
                 int modStatus = manipButton.isSelected() ? Grade.MANIPULATED : Grade.RESPONDING;
@@ -164,7 +165,16 @@ public final class CourseTab extends Button implements Drawable {
         );
         infoButton.setFontScale(.5);
         infoButton.addActionListener(event -> {
-            //TODO
+            InfoPanel info = new InfoPanel(course);
+            JButton[] options = WindowUtil.makeButtons("OK", "Cancel");
+            int choice = JOptionPane.showOptionDialog(null, info, course.getName(),
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
+                    null, options, options[0]);
+            if (choice == 0) {
+                course.setMajorSplit(info.getCustomSplit());
+                course.update();
+                updateBars(true);
+            }
         });
         infoButton.setEnabled(false);
     }
@@ -318,7 +328,7 @@ public final class CourseTab extends Button implements Drawable {
         labelBar.setW(w);
 
         addButton.setX(panel.getWidth() - addButton.getRect().width);
-        infoButton.setX(panel.getWidth() - addButton.getRect().width*2-1);
+        infoButton.setX(panel.getWidth() - addButton.getRect().width * 2 - 1);
 
         for (Bar bar : gradeBarList)
             bar.draw(g);
