@@ -88,7 +88,7 @@ public class WebAccessor {
         catch (FileNotFoundException ex) {
             Logger.getLogger(WebAccessor.class.getName()).log(Level.SEVERE, null, ex);
         }
-        OPTIONS.addArguments("user-data-dir="+path);
+        OPTIONS.addArguments("user-data-dir=" + path);
 //        OPTIONS.addArguments("user-data-dir=" + projPath +"\\chromeprofile");
 //        OPTIONS.addArguments("user-data-dir=" + projPath +"\\chromeprofile\\User Data");
         System.out.println(projPath + "\\chromeprofile");
@@ -131,16 +131,12 @@ public class WebAccessor {
                     }
                 }
 //            System.out.println("TEST: passed wait");
-                switch (driver.getCurrentUrl()) {
-                    case HOME:
-                        loggedIn = true;
-                        break;
-                    case LOGIN:
-                        driver.get(LOGIN);
-                        break;
-                    default:
-                        updateFields(driver);
-                }
+                if (driver.getCurrentUrl().equalsIgnoreCase(HOME))
+                    loggedIn = true;
+                else if (!driver.getCurrentUrl().equalsIgnoreCase(LOGIN))
+                    driver.get(LOGIN);
+                else
+                    updateFields(driver);
             }
 
             driver.manage().window().setPosition(new Point(-2000, 0));  //hide page
