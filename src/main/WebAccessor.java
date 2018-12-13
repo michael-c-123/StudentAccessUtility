@@ -79,16 +79,16 @@ public class WebAccessor {
         OPTIONS.addArguments("--disable-infobars");
         OPTIONS.addArguments("--ignore-certificate-errors");
         OPTIONS.addArguments("--disable-extensions"); // disable extensions
-//        String path = "";
-//        try {
-//            Scanner sc = new Scanner(new File("userdatapath.dat"));
-//            if (sc.hasNextLine())
-//                path = sc.nextLine();
-//        }
-//        catch (FileNotFoundException ex) {
-//            Logger.getLogger(WebAccessor.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        OPTIONS.addArguments("user-data-dir=C:\\Users\\Michael\\AppData\\Local\\Google\\Chrome\\Automation");
+        String path = "";
+        try {
+            Scanner sc = new Scanner(new File("userdatapath.dat"));
+            if (sc.hasNextLine())
+                path = sc.nextLine();
+        }
+        catch (FileNotFoundException ex) {
+            Logger.getLogger(WebAccessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        OPTIONS.addArguments("user-data-dir="+path);
 //        OPTIONS.addArguments("user-data-dir=" + projPath +"\\chromeprofile");
 //        OPTIONS.addArguments("user-data-dir=" + projPath +"\\chromeprofile\\User Data");
         System.out.println(projPath + "\\chromeprofile");
