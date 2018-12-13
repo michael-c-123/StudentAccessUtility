@@ -6,6 +6,8 @@
 
 package main;
 
+import java.awt.BorderLayout;
+import java.awt.Container;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
@@ -58,7 +60,7 @@ public final class StartWindow extends javax.swing.JFrame {
 
         resetButtons();
 
-        logInButton.requestFocus();
+        enterButton.requestFocus();
     }
 
     public Profile getProfile() {
@@ -132,18 +134,18 @@ public final class StartWindow extends javax.swing.JFrame {
     private void resetButtons() { //enable/disable buttons
         if (profile == null) {
             editButton.setEnabled(true);
-            nLogInButton.setEnabled(false);
-            logInButton.setEnabled(false);
+            updateButton.setEnabled(false);
+            enterButton.setEnabled(false);
         }
         else if (profile.isDenied()) {
             editButton.setEnabled(false);
-            nLogInButton.setEnabled(false);
-            logInButton.setEnabled(false);
+            updateButton.setEnabled(false);
+            enterButton.setEnabled(false);
         }
         else {
             editButton.setEnabled(true);
-            nLogInButton.setEnabled(true);
-            logInButton.setEnabled(true);
+            updateButton.setEnabled(true);
+            enterButton.setEnabled(true);
         }
     }
 
@@ -157,8 +159,8 @@ public final class StartWindow extends javax.swing.JFrame {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        nLogInButton = new javax.swing.JButton();
-        logInButton = new javax.swing.JButton();
+        updateButton = new javax.swing.JButton();
+        enterButton = new javax.swing.JButton();
         editButton = new javax.swing.JButton();
         usernameLabel = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
@@ -174,11 +176,11 @@ public final class StartWindow extends javax.swing.JFrame {
         });
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        nLogInButton.setText("Log In Without Updating");
-        nLogInButton.setEnabled(false);
-        nLogInButton.addActionListener(new java.awt.event.ActionListener() {
+        updateButton.setText("Update and Enter");
+        updateButton.setEnabled(false);
+        updateButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                nLogInButtonActionPerformed(evt);
+                updateButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -187,14 +189,14 @@ public final class StartWindow extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weighty = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(1, 5, 2, 5);
-        getContentPane().add(nLogInButton, gridBagConstraints);
+        getContentPane().add(updateButton, gridBagConstraints);
 
-        logInButton.setFont(new java.awt.Font("sansserif", 0, 24)); // NOI18N
-        logInButton.setText("Log In");
-        logInButton.setEnabled(false);
-        logInButton.addActionListener(new java.awt.event.ActionListener() {
+        enterButton.setFont(new java.awt.Font("sansserif", 0, 24)); // NOI18N
+        enterButton.setText("Enter");
+        enterButton.setEnabled(false);
+        enterButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                logInButtonActionPerformed(evt);
+                enterButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -202,9 +204,9 @@ public final class StartWindow extends javax.swing.JFrame {
         gridBagConstraints.gridy = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.weighty = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(1, 5, 4, 5);
-        getContentPane().add(logInButton, gridBagConstraints);
+        getContentPane().add(enterButton, gridBagConstraints);
 
         editButton.setText("Edit Account Info");
         editButton.addActionListener(new java.awt.event.ActionListener() {
@@ -267,29 +269,40 @@ public final class StartWindow extends javax.swing.JFrame {
         Driver.exit();
     }//GEN-LAST:event_formWindowClosing
 
-    private void nLogInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nLogInButtonActionPerformed
-        dispose();
-        new MainWindow(profile).showFrame();
-    }//GEN-LAST:event_nLogInButtonActionPerformed
-
-    private void logInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logInButtonActionPerformed
+    private void updateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateButtonActionPerformed
         try {
-            WebAccessor.studentAccess(profile);
-            dispose();
-            new MainWindow(profile).showFrame();
+            setEnabled(false);
+            setVisible(false);
+
+            boolean success = WebAccessor.studentAccess(profile);
+            if (success) {
+                dispose();
+                new MainWindow(profile).showFrame();
+            }
+            else {
+                JOptionPane.showMessageDialog(null, "An error occurred during the update.",
+                        "WebDriver error", JOptionPane.ERROR_MESSAGE);
+                setEnabled(true);
+                setVisible(true);
+            }
         }
         catch (InterruptedException ex) {
             Logger.getLogger(StartWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }//GEN-LAST:event_logInButtonActionPerformed
+    }//GEN-LAST:event_updateButtonActionPerformed
+
+    private void enterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enterButtonActionPerformed
+        dispose();
+        new MainWindow(profile).showFrame();
+    }//GEN-LAST:event_enterButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel dobLabel;
     private javax.swing.JButton editButton;
+    private javax.swing.JButton enterButton;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JButton logInButton;
-    private javax.swing.JButton nLogInButton;
     private javax.swing.JLabel schoolLabel;
+    private javax.swing.JButton updateButton;
     private javax.swing.JLabel usernameLabel;
     // End of variables declaration//GEN-END:variables
 }

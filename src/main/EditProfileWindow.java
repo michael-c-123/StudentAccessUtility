@@ -276,6 +276,9 @@ public class EditProfileWindow extends javax.swing.JFrame {
             changed = true;
             System.out.println("changed");
         }
+        else
+            JOptionPane.showMessageDialog(null, "An error occurred during the update.",
+                        "WebDriver error", JOptionPane.ERROR_MESSAGE);
 
         //focus stuff
         setEnabled(true);

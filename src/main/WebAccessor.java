@@ -91,7 +91,7 @@ public class WebAccessor {
         OPTIONS.addArguments("user-data-dir=C:\\Users\\Michael\\AppData\\Local\\Google\\Chrome\\Automation");
 //        OPTIONS.addArguments("user-data-dir=" + projPath +"\\chromeprofile");
 //        OPTIONS.addArguments("user-data-dir=" + projPath +"\\chromeprofile\\User Data");
-        System.out.println(projPath +"\\chromeprofile");
+        System.out.println(projPath + "\\chromeprofile");
         OPTIONS.addArguments("--disable-plugins");
         OPTIONS.addArguments("--start-maximized");
         OPTIONS.addArguments("--app=" + LOGIN); //open in app mode on SAC
@@ -111,16 +111,16 @@ public class WebAccessor {
 
         WebDriver driver = null;
         try {
-            driver = new ChromeDriver(OPTIONS);
-            //wait for user to successfully login
             boolean loggedIn = false;
+            driver = new ChromeDriver(OPTIONS);
             WebDriverWait wait = new WebDriverWait(driver, 86400);
-            do {
+            while (!loggedIn) {
                 try {
                     wait.until(ExpectedConditions.or(
-                            ExpectedConditions.urlMatches(HOME), //successful
+                            ExpectedConditions.not(ExpectedConditions.urlMatches(Pattern.quote(LOGIN))), //successful
                             fieldsChanged(driver, fields) //fields are changed
                     ));
+                    driver.getCurrentUrl();
                 }
                 catch (StaleElementReferenceException e) {
                     if (driver.findElements(By.name("parentid")).isEmpty() //no userID field found
@@ -131,13 +131,17 @@ public class WebAccessor {
                     }
                 }
 //            System.out.println("TEST: passed wait");
-
-                if (driver.getCurrentUrl().equals(HOME))
-                    loggedIn = true;
-                else
-                    updateFields(driver);
+                switch (driver.getCurrentUrl()) {
+                    case HOME:
+                        loggedIn = true;
+                        break;
+                    case LOGIN:
+                        driver.get(LOGIN);
+                        break;
+                    default:
+                        updateFields(driver);
+                }
             }
-            while (!loggedIn);
 
             driver.manage().window().setPosition(new Point(-2000, 0));  //hide page
             System.out.println(Arrays.toString(fields));
@@ -155,8 +159,8 @@ public class WebAccessor {
             updateClassWork(driver, profile, true); //get grades from each class
             Collections.sort(profile.getCourses());
         }
-        catch (WebDriverException e) {  //brower closed
-//            e.printStackTrace();
+        catch (WebDriverException e) {  //closed
+            e.printStackTrace();
             return null;
         }
         finally {
@@ -168,13 +172,11 @@ public class WebAccessor {
         return profile;
     }
 
-    public static void studentAccess(Profile profile) throws InterruptedException {
+    public static boolean studentAccess(Profile profile) throws InterruptedException {
         WebDriver driver = null;
 
         //wait for user to successfully login
         try {
-            fields = new String[7]; //fields that will be compared to check if user changed them
-            Arrays.fill(fields, "");
             boolean loggedIn = false;
             driver = new ChromeDriver(OPTIONS);
             WebDriverWait wait = new WebDriverWait(driver, 86400);
@@ -209,11 +211,14 @@ public class WebAccessor {
             }
             catch (NoSuchElementException e) {
                 System.err.println("TEST: failed to get grades.");
+                return false;
             }
+            return true;
         }
-        catch (WebDriverException e) {
+        catch (WebDriverException | NullPointerException e) {
             System.out.println("TEST: webdriverexception");
             e.printStackTrace();
+            return false;
         }
         finally {
             if (driver != null)
