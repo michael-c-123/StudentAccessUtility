@@ -54,8 +54,8 @@ public class WebAccessor {
 
     static {
         //set directory of ChromeDriver
-        String projectLoc = System.getProperty("user.dir"); //user.dir is the directory property of the project
-        System.setProperty("webdriver.chrome.driver", projectLoc + "/lib/chromedriver/chromedriver.exe");
+        String projPath = System.getProperty("user.dir"); //user.dir is the directory property of the project
+        System.setProperty("webdriver.chrome.driver", projPath + "/lib/chromedriver/chromedriver.exe");
 //        System.setProperty("webdriver.ie.driver", projectLoc + "/lib/iedriver/IEDriverServer.exe");
 //        System.setProperty("webdriver.gecko.driver", projectLoc + "/lib/geckodriver/geckodriver.exe");
 //        System.setProperty("webdriver.opera.driver", projectLoc + "/lib/operadriver/operadriver.exe");
@@ -78,19 +78,20 @@ public class WebAccessor {
         OPTIONS.addArguments("--disable-notifications");
         OPTIONS.addArguments("--disable-infobars");
         OPTIONS.addArguments("--ignore-certificate-errors");
-        OPTIONS.addArguments("--disable-extensions"); // disabling extensions
-        String path = "";
-        try {
-            Scanner sc = new Scanner(new File("userdatapath.dat"));
-            if (sc.hasNextLine())
-                path = sc.nextLine();
-        }
-        catch (FileNotFoundException ex) {
-            Logger.getLogger(WebAccessor.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        OPTIONS.addArguments("user-data-dir=" + path);
-//        OPTIONS.addArguments("user-data-dir=C:\\Users\\Michael\\Desktop");
-//        OPTIONS.addArguments("profile-directory=".concat("Default"));
+        OPTIONS.addArguments("--disable-extensions"); // disable extensions
+//        String path = "";
+//        try {
+//            Scanner sc = new Scanner(new File("userdatapath.dat"));
+//            if (sc.hasNextLine())
+//                path = sc.nextLine();
+//        }
+//        catch (FileNotFoundException ex) {
+//            Logger.getLogger(WebAccessor.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+        OPTIONS.addArguments("user-data-dir=C:\\Users\\Michael\\AppData\\Local\\Google\\Chrome\\Automation");
+//        OPTIONS.addArguments("user-data-dir=" + projPath +"\\chromeprofile");
+//        OPTIONS.addArguments("user-data-dir=" + projPath +"\\chromeprofile\\User Data");
+        System.out.println(projPath +"\\chromeprofile");
         OPTIONS.addArguments("--disable-plugins");
         OPTIONS.addArguments("--start-maximized");
         OPTIONS.addArguments("--app=" + LOGIN); //open in app mode on SAC

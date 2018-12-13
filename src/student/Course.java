@@ -32,15 +32,12 @@ public class Course implements Serializable, Comparable<Course> {
         daily = new Grade(Grade.NO_VALUE);
         this.period = period;
 
-        double split;
         if (name.matches(".*\\WAP(\\W|$).*") || name.matches(".*\\WDC(\\W|$).*"))
-            split = .8;
-        else if (name.matches(".*?H$") || name.contains("PreAP"))
-            split = .7;
+            majorSplit = .8;
+        else if (name.matches(".*?H$") || name.contains("PreAP") || name.contains("Multi-Variable"))
+            majorSplit = .7;
         else
-            split = .6;
-
-        majorSplit = split;
+            majorSplit = .6;
     }
 
     public String getName() {
@@ -119,21 +116,25 @@ public class Course implements Serializable, Comparable<Course> {
     //verify the split between major/daily to see if it adds up
     public void verifySplit(int checkAgainst) {
         double splitTest = majorSplit;
-        boolean match = Math.round(calcActualGradeUsing(splitTest)) == checkAgainst;
+        double calculated = calcActualGradeUsing(splitTest);
+        boolean match = Math.ceil(calculated) == checkAgainst
+                || Math.round(calculated) == checkAgainst;
         if (match)
             return;
 
         for (int percent = 60; percent <= 80 && !match; percent += 10) {
             splitTest = percent / 100.0; //prevents roundoff errors
-            double splitCalc = calcActualGradeUsing(splitTest);
-            match = Math.ceil(splitCalc) == checkAgainst;
-            System.out.println(name + " matches " + splitTest + ": " + splitCalc);
+            calculated = calcActualGradeUsing(splitTest);
+            match = Math.ceil(calculated) == checkAgainst
+                    || Math.round(calculated) == checkAgainst;
+            System.out.println(name + " matches " + splitTest + ": " + calculated);
         }
         for (int percent = 50; percent <= 90 && !match; percent += 5) {
             splitTest = percent / 100.0;
-            double splitCalc = calcActualGradeUsing(splitTest);
-            match = Math.ceil(splitCalc) == checkAgainst;
-            System.out.println(name + " matches " + splitTest + ": " + splitCalc);
+            calculated = calcActualGradeUsing(splitTest);
+            match = Math.ceil(calculated) == checkAgainst
+                    || Math.round(calculated) == checkAgainst;
+            System.out.println(name + " matches " + splitTest + ": " + calculated);
         }
 
         if (!match) { //does not match typical splits, must recalculate
