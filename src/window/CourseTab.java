@@ -67,7 +67,6 @@ public final class CourseTab extends Button implements Drawable {
         for (EntryGrade entryGrade : course.getGradeList()) {
             addGrade(entryGrade);
         }
-        course.update();
         updateBars(true);
     }
 
@@ -149,7 +148,6 @@ public final class CourseTab extends Button implements Drawable {
                 course.addGrade(new EntryGrade(modStatus,
                         nameField.getText().trim(), majorButton.isSelected(),
                         (Double) weightSpinner.getValue(), grade));
-                course.update();
                 updateBars(true);
             }
         });
@@ -172,7 +170,6 @@ public final class CourseTab extends Button implements Drawable {
                     null, options, options[0]);
             if (choice == 0) {
                 course.setMajorSplit(info.getCustomSplit());
-                course.update();
                 updateBars(true);
             }
         });
@@ -209,12 +206,13 @@ public final class CourseTab extends Button implements Drawable {
             grade.manipulate(input);
         else if (input == WindowUtil.RESET)
             grade.reset();
-        course.update();
         updateBars(true);
     }
 
     //change colors, disable/enable
     private void updateBars(boolean lockResponder) {
+        course.update();
+
         boolean doPositions = false;
         endBar.getButtons()[0].setColor(Grade.getColorDark(
                 course.getCurrent(true).getModStatus(), settings)); //update color
@@ -242,15 +240,19 @@ public final class CourseTab extends Button implements Drawable {
                     button.kill();
                 }
                 doPositions = true;
+                course.update();
                 break;
             }
+        }
+
+        for (Bar bar : gradeBarList) {
+            bar.updateText();
         }
 
         if (lockResponder) {
             Bar soleResponder = null;
             boolean foundSoleResponder = false;
             for (Bar bar : gradeBarList) {
-                bar.updateText();
                 if (bar.getGrade().getModStatus() == Grade.RESPONDING
                         && !bar.getGrade().isEmpty()) {
                     if (foundSoleResponder) {
@@ -440,7 +442,6 @@ public final class CourseTab extends Button implements Drawable {
             if (i != 1 && i != 2)
                 buttons[i].addActionListener(event -> {
                     updateBars(index == 0);
-                    course.update();
                 });
         }
     }
