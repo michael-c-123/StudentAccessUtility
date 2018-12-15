@@ -79,19 +79,18 @@ public class WebAccessor {
         OPTIONS.addArguments("--disable-infobars");
         OPTIONS.addArguments("--ignore-certificate-errors");
         OPTIONS.addArguments("--disable-extensions"); // disable extensions
-        String path = "";
-        try {
-            Scanner sc = new Scanner(new File("userdatapath.dat"));
-            if (sc.hasNextLine())
-                path = sc.nextLine();
-        }
-        catch (FileNotFoundException ex) {
-            Logger.getLogger(WebAccessor.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        OPTIONS.addArguments("user-data-dir=" + path);
-//        OPTIONS.addArguments("user-data-dir=" + projPath +"\\chromeprofile");
-//        OPTIONS.addArguments("user-data-dir=" + projPath +"\\chromeprofile\\User Data");
-        System.out.println(projPath + "\\chromeprofile");
+//        String path = "";
+//        try {
+//            Scanner sc = new Scanner(new File("userdatapath.dat"));
+//            if (sc.hasNextLine())
+//                path = sc.nextLine();
+//        }
+//        catch (FileNotFoundException ex) {
+//            Logger.getLogger(WebAccessor.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        OPTIONS.addArguments("user-data-dir=" + path);
+        OPTIONS.addArguments("user-data-dir=" + projPath + "\\Automation");
+        System.out.println(projPath + "\\Automation");
         OPTIONS.addArguments("--disable-plugins");
         OPTIONS.addArguments("--start-maximized");
         OPTIONS.addArguments("--app=" + LOGIN); //open in app mode on SAC
@@ -101,7 +100,7 @@ public class WebAccessor {
         OPTIONS.setExperimentalOption("prefs", prefs);
     }
 
-    public static Profile createNewProfile() throws WebDriverException {
+    public static Profile createNewProfile() {
         //fields that will be used
         fields = new String[7];
         Arrays.fill(fields, "");
@@ -168,7 +167,7 @@ public class WebAccessor {
         return profile;
     }
 
-    public static boolean studentAccess(Profile profile) throws InterruptedException {
+    public static boolean studentAccess(Profile profile) {
         WebDriver driver = null;
 
         //wait for user to successfully login
@@ -200,15 +199,9 @@ public class WebAccessor {
             driver.manage().window().setPosition(new Point(-2000, 0));  //hide page
 
             driver.switchTo().frame("main");    //go to the SAC frame
-            try {
-                updateReportCard(driver, profile);
-                updateClassWork(driver, profile, false);
-                Collections.sort(profile.getCourses());
-            }
-            catch (NoSuchElementException e) {
-                System.err.println("TEST: failed to get grades.");
-                return false;
-            }
+            updateReportCard(driver, profile);
+            updateClassWork(driver, profile, false);
+            Collections.sort(profile.getCourses());
             return true;
         }
         catch (WebDriverException | NullPointerException e) {
@@ -222,7 +215,7 @@ public class WebAccessor {
         }
     }
 
-    private static boolean updateFields(WebDriver driver) {
+    private static boolean updateFields(WebDriver driver) throws NoSuchElementException {
         try {
             WebElement[] elements = new WebElement[7];
             elements[0] = driver.findElement(By.name("parentid"));
@@ -250,7 +243,7 @@ public class WebAccessor {
         }
     }
 
-    private static void sendKeys(WebDriver driver, Profile p) {
+    private static void sendKeys(WebDriver driver, Profile p) throws NoSuchElementException {
         WebElement table = driver.findElement(By.cssSelector(
                 "body > font > center > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody"));
         long time = System.currentTimeMillis(); //check time taken for each element filled
@@ -286,66 +279,60 @@ public class WebAccessor {
         System.out.println(System.currentTimeMillis() - time);
     }
 
-    private static void updateReportCard(WebDriver driver, Profile profile) {
-        try {
-            WebElement reportTab = driver.findElement(By.xpath("//*[text()[contains(.,'Report')]]"));
-            reportTab.click();
-            WebElement table = driver.findElement(By.cssSelector("body > center:nth-child(6) > form > table > tbody"));
-            List<WebElement> rows = table.findElements(By.tagName("tr"));
-            List<String> names = new ArrayList<>();
-            List<Integer> periods = new ArrayList<>();
-            List<String> grades = new ArrayList<>();
+    private static void updateReportCard(WebDriver driver, Profile profile) throws NoSuchElementException {
+        WebElement reportTab = driver.findElement(By.xpath("//*[text()[contains(.,'Report')]]"));
+        reportTab.click();
+        WebElement table = driver.findElement(By.cssSelector("body > center:nth-child(6) > form > table > tbody"));
+        List<WebElement> rows = table.findElements(By.tagName("tr"));
+        List<String> names = new ArrayList<>();
+        List<Integer> periods = new ArrayList<>();
+        List<String> grades = new ArrayList<>();
 
-            for (int i = 2; i < rows.size(); i++) {
-                WebElement row = rows.get(i);
-                List<WebElement> cells = row.findElements(By.tagName("td"));
-                //TEST
-                for (WebElement cell : cells) {
-                    System.out.println(cell.getText());
-                }
-                System.out.println("END ROW");
-                //ENDTEST
-                names.add(cells.get(0).getText());
-                periods.add(Integer.parseInt(cells.get(1).getText()));
-                grades.add(cells.get(3).getText());
-                System.out.println(cells.get(3).getText());
-
-            }
-            //add/update courses
-            for (int i = 0; i < grades.size(); i++) {
-                Course rowCourse = profile.getCourseByName(names.get(i));
-                if (rowCourse == null) {
-                    rowCourse = new Course(names.get(i),
-                            periods.get(i));
-                    profile.addCourse(rowCourse);
-                }
-                String m1 = grades.get(i);
-                if (m1 != null && !m1.isEmpty()) {
-                    rowCourse.getM1().setValue(Integer.parseInt(m1));
-                    rowCourse.setOnM1(true);
-                }
-                else
-                    rowCourse.setOnM1(false);
-            }
-            //clean courses for extras
-            if (profile.getCourses().size() != names.size())
-                for (Course course : profile.getCourses()) {
-                    String courseName = course.getName();
-                    if (!names.contains(courseName))
-                        profile.removeCourse(course);
-                }
+        for (int i = 2; i < rows.size(); i++) {
+            WebElement row = rows.get(i);
+            List<WebElement> cells = row.findElements(By.tagName("td"));
             //TEST
-            for (Course course : profile.getCourses()) {
-                System.out.println(course);
+            for (WebElement cell : cells) {
+                System.out.println(cell.getText());
             }
+            System.out.println("END ROW");
+            //ENDTEST
+            names.add(cells.get(0).getText());
+            periods.add(Integer.parseInt(cells.get(1).getText()));
+            grades.add(cells.get(3).getText());
+            System.out.println(cells.get(3).getText());
+
         }
-        catch (NoSuchElementException e) {
-            System.out.println("TEST: failed to get report card");
-            e.printStackTrace();
+        //add/update courses
+        for (int i = 0; i < grades.size(); i++) {
+            Course rowCourse = profile.getCourseByName(names.get(i));
+            if (rowCourse == null) {
+                rowCourse = new Course(names.get(i),
+                        periods.get(i));
+                profile.addCourse(rowCourse);
+            }
+            String m1 = grades.get(i);
+            if (m1 != null && !m1.isEmpty()) {
+                rowCourse.getM1().setValue(Integer.parseInt(m1));
+                rowCourse.setOnM1(true);
+            }
+            else
+                rowCourse.setOnM1(false);
+        }
+        //clean courses for extras
+        if (profile.getCourses().size() != names.size())
+            for (Course course : profile.getCourses()) {
+                String courseName = course.getName();
+                if (!names.contains(courseName))
+                    profile.removeCourse(course);
+            }
+        //TEST
+        for (Course course : profile.getCourses()) {
+            System.out.println(course);
         }
     }
 
-    private static void updateClassWork(WebDriver driver, Profile profile, boolean verify) {
+    private static void updateClassWork(WebDriver driver, Profile profile, boolean verify) throws NoSuchElementException {
         try {
             WebElement workTab = driver.findElement(By.xpath("//*[text()[contains(.,'Work')]]"));
             workTab.click();
@@ -366,7 +353,7 @@ public class WebAccessor {
         }
     }
 
-    public static void recursiveNavigateTables(Profile profile, WebElement center, boolean verify) {
+    private static void recursiveNavigateTables(Profile profile, WebElement center, boolean verify) throws NoSuchElementException {
         WebElement head = center.findElement(By.cssSelector("table:nth-child(1) > tbody > tr:nth-child(1)"));
         WebElement gradeTable = center.findElement(By.cssSelector("table:nth-child(1) > tbody > tr:nth-child(2) > td > table > tbody"));
 
