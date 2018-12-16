@@ -6,16 +6,13 @@
 
 package main;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import student.Course;
 import student.Profile;
 import window.MainWindow;
 
@@ -59,6 +56,7 @@ public final class StartWindow extends javax.swing.JFrame {
         }
 
         resetButtons();
+        enterButton.setText(enabled ? "Enter" : "Enter Without Profile");
 
         enterButton.requestFocus();
     }
@@ -135,7 +133,7 @@ public final class StartWindow extends javax.swing.JFrame {
         if (profile == null) {
             editButton.setEnabled(true);
             updateButton.setEnabled(false);
-            enterButton.setEnabled(false);
+            enterButton.setEnabled(true);
         }
         else if (profile.isDenied()) {
             editButton.setEnabled(false);
@@ -288,6 +286,10 @@ public final class StartWindow extends javax.swing.JFrame {
 
     private void enterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enterButtonActionPerformed
         dispose();
+        if (profile == null) {
+            profile = new Profile("Guest", 0, null, 0, 0);
+            profile.addCourse(new Course("Guest", 0));
+        }
         new MainWindow(profile).showFrame();
     }//GEN-LAST:event_enterButtonActionPerformed
 

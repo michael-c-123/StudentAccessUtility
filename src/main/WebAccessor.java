@@ -1,8 +1,6 @@
 
 package main;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -14,10 +12,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.function.Predicate;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -56,9 +51,6 @@ public class WebAccessor {
         //set directory of ChromeDriver
         String projPath = System.getProperty("user.dir"); //user.dir is the directory property of the project
         System.setProperty("webdriver.chrome.driver", projPath + "/lib/chromedriver/chromedriver.exe");
-//        System.setProperty("webdriver.ie.driver", projectLoc + "/lib/iedriver/IEDriverServer.exe");
-//        System.setProperty("webdriver.gecko.driver", projectLoc + "/lib/geckodriver/geckodriver.exe");
-//        System.setProperty("webdriver.opera.driver", projectLoc + "/lib/operadriver/operadriver.exe");
 
         DesiredCapabilities capabilities = DesiredCapabilities.internetExplorer();
         capabilities.setCapability(InternetExplorerDriver.ENABLE_PERSISTENT_HOVERING, false);
@@ -79,16 +71,6 @@ public class WebAccessor {
         OPTIONS.addArguments("--disable-infobars");
         OPTIONS.addArguments("--ignore-certificate-errors");
         OPTIONS.addArguments("--disable-extensions"); // disable extensions
-//        String path = "";
-//        try {
-//            Scanner sc = new Scanner(new File("userdatapath.dat"));
-//            if (sc.hasNextLine())
-//                path = sc.nextLine();
-//        }
-//        catch (FileNotFoundException ex) {
-//            Logger.getLogger(WebAccessor.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        OPTIONS.addArguments("user-data-dir=" + path);
         OPTIONS.addArguments("user-data-dir=" + projPath + "\\Automation");
         System.out.println(projPath + "\\Automation");
         OPTIONS.addArguments("--disable-plugins");
@@ -105,7 +87,6 @@ public class WebAccessor {
         fields = new String[7];
         Arrays.fill(fields, "");
 
-//        List<Course>[] lists; //TODO
         Profile profile;
 
         WebDriver driver = null;
@@ -125,11 +106,9 @@ public class WebAccessor {
                     if (driver.findElements(By.name("parentid")).isEmpty() //no userID field found
                             && !driver.getCurrentUrl().equals(HOME)) { //not currently on the login screen
                         driver.navigate().refresh(); //refresh page
-                        System.out.println("TEST: halp when does this trigger");
                         continue;
                     }
                 }
-//            System.out.println("TEST: passed wait");
                 if (driver.getCurrentUrl().equalsIgnoreCase(HOME))
                     loggedIn = true;
                 else if (!driver.getCurrentUrl().equalsIgnoreCase(LOGIN))

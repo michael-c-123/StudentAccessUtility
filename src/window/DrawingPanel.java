@@ -48,10 +48,10 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
         sidebar = new Sidebar();
         sidebarButton = new Button(this,
                 new Rectangle(0, 0, CourseTab.TITLE_HEIGHT, CourseTab.TITLE_HEIGHT),
-                "", (Color) profile.getSettings().get("color dark"), Button.STANDARD);
+                "", (Color) this.profile.getSettings().get("color dark"), Button.STANDARD);
         sidebarButton.setIcon(LEFT);
 
-        for (Course course : profile.getCourses()) {
+        for (Course course : this.profile.getCourses()) {
             addCourse(course);
             System.out.println(course.getMajorSplit());
         }
@@ -90,13 +90,13 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
                     else {
                         int scrollBy;
                         switch (ke.getKeyCode()) {
-                            case KeyEvent.VK_UP: scrollBy = -(int) profile.getSettings().get("grade bar size") -1;
+                            case KeyEvent.VK_UP: scrollBy = -(int) profile.getSettings().get("grade bar size") - 1;
                                 break;
                             case KeyEvent.VK_DOWN: scrollBy = (int) profile.getSettings().get("grade bar size") + 1;
                                 break;
-                            case KeyEvent.VK_HOME: scrollBy = Integer.MIN_VALUE/2;
+                            case KeyEvent.VK_HOME: scrollBy = Integer.MIN_VALUE / 2;
                                 break;
-                            case KeyEvent.VK_END: scrollBy = Integer.MAX_VALUE/2;
+                            case KeyEvent.VK_END: scrollBy = Integer.MAX_VALUE / 2;
                                 break;
                             default: return;
                         }
