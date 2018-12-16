@@ -8,11 +8,9 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.Map;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import main.WindowUtil;
 import student.EntryGrade;
@@ -181,29 +179,7 @@ public final class Bar {
     //DAILY/MAJOR button
     private void initListener4() {
         buttons[4].addActionListener(event -> {
-            JRadioButton majorButton = new JRadioButton("Major");
-            JRadioButton dailyButton = new JRadioButton("Daily");
-            ButtonGroup group = new ButtonGroup();
-            group.add(majorButton);
-            group.add(dailyButton);
-
-            if (grade.isMajor())
-                majorButton.setSelected(true);
-            else
-                dailyButton.setSelected(true);
-
-            JPanel panel = new JPanel();
-            panel.add(majorButton);
-            panel.add(dailyButton);
-
-            int option = JOptionPane.showOptionDialog(null, panel,
-                    "Change Type",
-                    JOptionPane.OK_CANCEL_OPTION, //option type
-                    JOptionPane.PLAIN_MESSAGE, //message type
-                    null, null, null); //icon, options, initial value (all default)
-            if (option == JOptionPane.OK_OPTION) {
-                grade.setMajor(group.getSelection() == majorButton.getModel());
-            }
+            grade.setMajor(!grade.isMajor());
             updateText();
         });
     }
@@ -243,7 +219,7 @@ public final class Bar {
             buttons[5].setText(String.format("%.2f", grade.getValue()));
 
         int bold = grade.isMajor() ? Font.BOLD : Font.PLAIN;
-        int ital = grade.isExtra()? Font.ITALIC : Font.PLAIN;
+        int ital = grade.isExtra() ? Font.ITALIC : Font.PLAIN;
         for (int i = 0; i < buttons.length; i++) {
             Button button = buttons[i];
             if (i != 0)
