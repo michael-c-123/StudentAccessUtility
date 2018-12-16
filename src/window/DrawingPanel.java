@@ -24,7 +24,7 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
     private Profile profile;
 
     private Drawable currentPage;
-    private Sidebar sidebar; //TODO finish sidebar
+    private Sidebar sidebar;
     private boolean sidebarOn;
     private Button sidebarButton;
     private static final Button.Icon LEFT = (g, x, y, w, h) -> {
@@ -67,13 +67,42 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
             public void keyPressed(KeyEvent ke) {
                 if (ke.getKeyChar() == ' ')
                     sidebarButton.doClick(true);
+                else if (ke.getKeyCode() == KeyEvent.VK_PAGE_DOWN
+                        || ke.getKeyCode() == KeyEvent.VK_DOWN && ke.isControlDown()) {
+                    int next = sidebar.getSelectionIndex() + 1;
+                    if (next < sidebar.getButtonList().size())
+                        sidebar.getButtonList().get(next).doClick();
+                }
+                else if (ke.getKeyCode() == KeyEvent.VK_PAGE_UP
+                        || ke.getKeyCode() == KeyEvent.VK_UP && ke.isControlDown()) {
+                    int prev = sidebar.getSelectionIndex() - 1;
+                    if (prev >= 0)
+                        sidebar.getButtonList().get(prev).doClick();
+                }
+                else if (currentPage instanceof CourseTab) {
+                    CourseTab tab = (CourseTab) currentPage;
+                    if (ke.isControlDown()) {
+                        if (ke.getKeyCode() == KeyEvent.VK_N)
+                            tab.getAddButton().doClick();
+                        else if (ke.getKeyCode() == KeyEvent.VK_I)
+                            tab.getInfoButton().doClick();
+                    }
+                    else if (ke.getKeyCode() == KeyEvent.VK_UP) {
+                        tab.scroll(-(int) profile.getSettings().get("grade bar size"));
+                        repaint();
+                    }
+                    else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
+                        tab.scroll(+(int) profile.getSettings().get("grade bar size"));
+                        repaint();
+                    }
+
+                }
             }
 
             @Override
             public void keyReleased(KeyEvent ke) {
                 if (ke.getKeyChar() == ' ')
                     sidebarButton.doClick(false);
-
             }
         });
         addMouseWheelListener(this);
@@ -116,14 +145,6 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
     public void switchSidebar() {
         sidebarOn = !sidebarOn;
         sidebar.setEnabled(sidebarOn);
-        if (sidebarOn) {
-            sidebarButton.setX((int) (Sidebar.SIZE_RATIO * getWidth()) + 1);
-            sidebarButton.setIcon(RIGHT);
-        }
-        else {
-            sidebarButton.setX(0);
-            sidebarButton.setIcon(LEFT);
-        }
         repaint();
     }
 
@@ -134,6 +155,14 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
         if (currentPage != null)
             currentPage.drawUsing(g, this, sidebarOn);
 
+        if (sidebarOn) {
+            sidebarButton.setX((int) (Sidebar.SIZE_RATIO * getWidth()) + 1);
+            sidebarButton.setIcon(RIGHT);
+        }
+        else {
+            sidebarButton.setX(0);
+            sidebarButton.setIcon(LEFT);
+        }
         sidebarButton.draw(g);
     }
 

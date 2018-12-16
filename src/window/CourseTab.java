@@ -209,6 +209,14 @@ public final class CourseTab extends Button implements Drawable {
         updateBars(true);
     }
 
+    public Button getAddButton() {
+        return addButton;
+    }
+
+    public Button getInfoButton() {
+        return infoButton;
+    }
+
     //change colors, disable/enable
     private void updateBars(boolean lockResponder) {
         course.update();
