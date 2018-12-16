@@ -43,6 +43,13 @@ public class Sidebar implements Drawable {
         return buttonList;
     }
 
+    public int getSelectionIndex() {
+        for (int i = 0; i < buttonList.size(); i++)
+            if (buttonList.get(i).isSelected())
+                return i;
+        return -1;
+    }
+
     public void addButton(Button button) {
         button.setRect(new Rectangle(0, buttonList.size() * (BUTTON_SIZE + 1), 0, BUTTON_SIZE)); //0 placeholder for width
         buttonList.add(button);

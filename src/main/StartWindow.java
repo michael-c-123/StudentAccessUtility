@@ -270,24 +270,19 @@ public final class StartWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosing
 
     private void updateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateButtonActionPerformed
-        try {
-            setEnabled(false);
-            setVisible(false);
+        setEnabled(false);
+        setVisible(false);
 
-            boolean success = WebAccessor.studentAccess(profile);
-            if (success) {
-                dispose();
-                new MainWindow(profile).showFrame();
-            }
-            else {
-                JOptionPane.showMessageDialog(null, "An error occurred during the update.",
-                        "WebDriver error", JOptionPane.ERROR_MESSAGE);
-                setEnabled(true);
-                setVisible(true);
-            }
+        boolean success = WebAccessor.studentAccess(profile);
+        if (success) {
+            dispose();
+            new MainWindow(profile).showFrame();
         }
-        catch (InterruptedException ex) {
-            Logger.getLogger(StartWindow.class.getName()).log(Level.SEVERE, null, ex);
+        else {
+            JOptionPane.showMessageDialog(null, "An error occurred during the update.",
+                    "WebDriver error", JOptionPane.ERROR_MESSAGE);
+            setEnabled(true);
+            setVisible(true);
         }
     }//GEN-LAST:event_updateButtonActionPerformed
 
