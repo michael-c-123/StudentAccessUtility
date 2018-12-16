@@ -1,1 +1,4 @@
-C:\\Users\\Michael\\AppData\\Local\\Google\\Chrome\\Automation
+C:/your/path/here
+#Make a copy of the Chrome User Data folder here. 
+#The path can be found at chrome://version on Chrome. Put the path to the copied directory here.
+#See the README for detailed info.
