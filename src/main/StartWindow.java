@@ -37,7 +37,7 @@ public final class StartWindow extends javax.swing.JFrame {
     public void setProfile(Profile profile) {
         this.profile = profile;
 
-        boolean enabled = (this.profile != null); //not enabled if profile is null (no profile exists)
+        boolean enabled = (this.profile != null && !this.profile.isTemp()); //not enabled if profile is null (no profile exists)
 
         //set all info in the text labels
         if (enabled) {
@@ -130,7 +130,7 @@ public final class StartWindow extends javax.swing.JFrame {
     }
 
     private void resetButtons() { //enable/disable buttons
-        if (profile == null) {
+        if (profile == null || profile.isTemp()) {
             editButton.setEnabled(true);
             updateButton.setEnabled(false);
             enterButton.setEnabled(true);
@@ -289,6 +289,7 @@ public final class StartWindow extends javax.swing.JFrame {
         if (profile == null) {
             profile = new Profile("Guest", 0, null, 0, 0);
             profile.addCourse(new Course("Guest", 0));
+            profile.setTemp(true);
         }
         new MainWindow(profile).showFrame();
     }//GEN-LAST:event_enterButtonActionPerformed
