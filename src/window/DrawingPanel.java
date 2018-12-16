@@ -90,9 +90,9 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
                     else {
                         int scrollBy;
                         switch (ke.getKeyCode()) {
-                            case KeyEvent.VK_UP: scrollBy = -(int) profile.getSettings().get("grade bar size");
+                            case KeyEvent.VK_UP: scrollBy = -(int) profile.getSettings().get("grade bar size") -1;
                                 break;
-                            case KeyEvent.VK_DOWN: scrollBy = (int) profile.getSettings().get("grade bar size");
+                            case KeyEvent.VK_DOWN: scrollBy = (int) profile.getSettings().get("grade bar size") + 1;
                                 break;
                             case KeyEvent.VK_HOME: scrollBy = Integer.MIN_VALUE/2;
                                 break;

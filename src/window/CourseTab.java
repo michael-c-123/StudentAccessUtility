@@ -356,8 +356,6 @@ public final class CourseTab extends Button implements Drawable {
 
         addButton.draw(g);
         infoButton.draw(g);
-
-        //TODO draw other stuff here
     }
 
     private void drawEndBar(Graphics g, int x, int END_Y, int w, int SIZE) {
@@ -417,10 +415,13 @@ public final class CourseTab extends Button implements Drawable {
             scrollPosition = 0;
         else {
             final int SIZE = (int) settings.get("grade bar size");
-            int endOfBars = gradeBarList.size() * (SIZE + 5); // TODO make this accurate and stop scrolling at the correct location
-            endOfBars += TITLE_HEIGHT;
-            if (scrollPosition + panel.getHeight() > endOfBars)
-                scrollPosition = endOfBars - panel.getHeight();
+            int endOfBars = gradeBarList.size() * (SIZE + 1); // TODO make this accurate and stop scrolling at the correct location
+            int visibleSegment = panel.getHeight();
+            visibleSegment -= TITLE_HEIGHT + SIZE*3;
+
+            endOfBars -= visibleSegment;
+            if (scrollPosition  > endOfBars)
+                scrollPosition = endOfBars;
             if (scrollPosition < 0)
                 scrollPosition = 0;
         }
