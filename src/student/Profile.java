@@ -14,7 +14,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,7 @@ import java.util.regex.Pattern;
 public class Profile implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    public boolean temp;
     public static final int USERNAME = 0, ID = 1,
             MONTH = 2, DAY = 3, YEAR = 4,
             GRADE = 5, SCHOOL = 6;
@@ -153,6 +153,14 @@ public class Profile implements Serializable {
      */
     public Map<String, Object> getSettings() {
         return settings;
+    }
+
+    public boolean isTemp() {
+        return temp;
+    }
+
+    public void setTemp(boolean temp) {
+        this.temp = temp;
     }
 
     public boolean isLocked() {

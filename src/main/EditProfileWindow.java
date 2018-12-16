@@ -37,7 +37,7 @@ public class EditProfileWindow extends javax.swing.JFrame {
     }
 
     private void updateInfoDisplay() {
-        if (profile != null) { //take profile info and put it into the boxes
+        if (profile != null && !profile.isTemp()) { //take profile info and put it into the boxes
             usernameField.setText(profile.getString(Profile.USERNAME));
             idField.setText(profile.getString(Profile.ID));
             birthdateField.setText(

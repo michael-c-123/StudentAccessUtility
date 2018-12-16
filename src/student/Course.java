@@ -19,7 +19,7 @@ public class Course implements Serializable, Comparable<Course> {
     private Grade major, daily;
     private double majorSplit;
     private boolean onM1 = true;
-    private int actualEstimate;
+    private int actualEstimate = -1;
 
     public Course(String name, int period) {
         this.name = name;
@@ -348,8 +348,6 @@ public class Course implements Serializable, Comparable<Course> {
     public void setActualEstimate(int actualEstimate) {
         this.actualEstimate = actualEstimate;
     }
-
-
 
     @Override
     public String toString() {

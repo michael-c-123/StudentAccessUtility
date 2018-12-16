@@ -377,6 +377,8 @@ public final class CourseTab extends Button implements Drawable {
         WindowUtil.drawCenteredString(g, "MAJOR", labelRects[1]);
         WindowUtil.drawCenteredString(g, "DAILY", labelRects[2]);
         String desc = course.isOnM1() ? "NEXT" : "PREV";
+        if (course.getActualEstimate() == -1)
+            desc = "NEXT/PREV";
         WindowUtil.drawCenteredString(g, desc + " QUARTER", labelRects[3]);
         WindowUtil.drawCenteredString(g, "EXAM", labelRects[4]);
         WindowUtil.drawCenteredString(g, "SEMESTER", labelRects[5]);

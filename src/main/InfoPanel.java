@@ -21,8 +21,16 @@ public class InfoPanel extends javax.swing.JPanel {
         initComponents();
         nameLabel.setText(course.getName());
         periodLabel.setText(String.format("Period %d", course.getPeriod()));
-        estField.setText("" + course.getActualEstimate());
-        calcField.setText(String.format("%.2f", course.calcActualGradeUsing(course.getMajorSplit())));
+        int est = course.getActualEstimate();
+        if (est == -1)
+            estField.setText("-");
+        else
+            estField.setText("" + est);
+        double calc = course.calcActualGradeUsing(course.getMajorSplit());
+        if (calc == Double.NEGATIVE_INFINITY)
+            calcField.setText("-");
+        else
+            calcField.setText(String.format("%.2f", calc));
     }
 
     public double getCustomSplit() {
@@ -126,7 +134,11 @@ public class InfoPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void splitSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_splitSpinnerStateChanged
-        calcField.setText(String.format("%.2f", course.calcActualGradeUsing((double)splitSpinner.getValue())));
+        double calc = course.calcActualGradeUsing((double) splitSpinner.getValue());
+        if (calc == Double.NEGATIVE_INFINITY)
+            calcField.setText("-");
+        else
+            calcField.setText(String.format("%.2f", calc));
     }//GEN-LAST:event_splitSpinnerStateChanged
 
 
