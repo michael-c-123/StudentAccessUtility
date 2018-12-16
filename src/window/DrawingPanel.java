@@ -87,15 +87,22 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
                         else if (ke.getKeyCode() == KeyEvent.VK_I)
                             tab.getInfoButton().doClick();
                     }
-                    else if (ke.getKeyCode() == KeyEvent.VK_UP) {
-                        tab.scroll(-(int) profile.getSettings().get("grade bar size"));
+                    else {
+                        int scrollBy;
+                        switch (ke.getKeyCode()) {
+                            case KeyEvent.VK_UP: scrollBy = -(int) profile.getSettings().get("grade bar size");
+                                break;
+                            case KeyEvent.VK_DOWN: scrollBy = (int) profile.getSettings().get("grade bar size");
+                                break;
+                            case KeyEvent.VK_HOME: scrollBy = Integer.MIN_VALUE/2;
+                                break;
+                            case KeyEvent.VK_END: scrollBy = Integer.MAX_VALUE/2;
+                                break;
+                            default: return;
+                        }
+                        tab.scroll(scrollBy);
                         repaint();
                     }
-                    else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
-                        tab.scroll(+(int) profile.getSettings().get("grade bar size"));
-                        repaint();
-                    }
-
                 }
             }
 
