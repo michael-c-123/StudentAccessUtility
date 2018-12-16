@@ -248,16 +248,17 @@ public class Course implements Serializable, Comparable<Course> {
                 current.setValue(result); //the most normal possible result
         }
 
-        if (other.isFixed()
+        if (current.isFixed()
+                && other.isFixed()
                 && exam.isFixed()
                 && sem.isPliable()) {
             double result = (current.getValue() + other.getValue()) //CALC D
                     * ((1 - TEST_SPLIT) / 2)
                     + TEST_SPLIT * exam.getValue();
             sem.respond(result);
-
         }
-        else if (other.isFixed()
+        else if (current.isFixed()
+                && other.isFixed()
                 && sem.isFixed()
                 && exam.isPliable()) {
             double result = (sem.getValue() //CALC E
@@ -265,7 +266,8 @@ public class Course implements Serializable, Comparable<Course> {
                     * ((1 - TEST_SPLIT) / 2)) / TEST_SPLIT;
             exam.respond(result);
         }
-        else if (exam.isFixed()
+        else if (current.isFixed()
+                && exam.isFixed()
                 && sem.isFixed()
                 && other.isPliable()) {
             double result = (sem.getValue() - TEST_SPLIT * exam.getValue()) //CALC F

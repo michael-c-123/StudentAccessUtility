@@ -44,7 +44,7 @@ public class Grade implements Serializable {
     public boolean isFixed() {
         if (isEmpty())
             return false;
-        return (modStatus == MANIPULATED) || (modStatus == NORMAL);
+        return (modStatus == MANIPULATED) || (modStatus == NORMAL) || (modStatus == REACTING);
     }
 
     public boolean isPliable() {
