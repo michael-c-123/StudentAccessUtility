@@ -4,7 +4,6 @@ package window;
 import button.Button;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
@@ -129,11 +128,11 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
     private void addCourse(Course course) {
         CourseTab tab = new CourseTab(course, profile.getSettings(), this,
                 new Rectangle(), course.getName(), new Color(100, 100, 100), Button.STANDARD);
-        tab.addActionListener((ActionEvent ae) -> {
+        tab.getTab().addActionListener((ActionEvent ae) -> {
             changePage(tab);
         });
 
-        sidebar.addButton(tab);
+        sidebar.addButton(tab.getTab());
 
         if (sidebar.getButtonList().size() == 1)
             sidebar.getButtonList().get(0).doClick();

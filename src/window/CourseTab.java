@@ -29,8 +29,10 @@ import student.Grade;
 /**
  * @author Michael
  */
-public final class CourseTab extends Button implements Drawable {
+public final class CourseTab implements Drawable {
     public static final int TITLE_HEIGHT = 50; //how much space the title heading takes up
+    private final Button tab;
+    private final JPanel panel;
     private final Bar labelBar;
     private final Bar endBar;
     private ArrayList<Bar> gradeBarList;
@@ -42,8 +44,9 @@ public final class CourseTab extends Button implements Drawable {
     private Map<String, Object> settings;
 
     public CourseTab(Course course, Map<String, Object> settings, JPanel panel, //panel is always the drawing panel
-            Rectangle rect, String text, Color color, ButtonPlan plan) {
-        super(panel, rect, text, color, plan);
+            Rectangle rect, String text, Color color, Button.ButtonPlan plan) {
+        this.panel = panel;
+        tab = new Button(panel, rect, text, color, plan);
         gradeBarList = new ArrayList<>();
         this.course = course;
         this.settings = settings;
@@ -196,6 +199,10 @@ public final class CourseTab extends Button implements Drawable {
             endBar.getButtons()[3].setEnabled(false);
         endBar.getButtons()[4].addActionListener(event -> showChangeWindow(course.getExam(), "Control Exam Grade"));
         endBar.getButtons()[5].addActionListener(event -> showChangeWindow(course.getSem(), "Control Semester Grade"));
+    }
+
+    public Button getTab() {
+        return tab;
     }
 
     private void showChangeWindow(Grade grade, String title) {
@@ -419,10 +426,10 @@ public final class CourseTab extends Button implements Drawable {
             final int SIZE = (int) settings.get("grade bar size");
             int endOfBars = gradeBarList.size() * (SIZE + 1); // TODO make this accurate and stop scrolling at the correct location
             int visibleSegment = panel.getHeight();
-            visibleSegment -= TITLE_HEIGHT + SIZE*3;
+            visibleSegment -= TITLE_HEIGHT + SIZE * 3;
 
             endOfBars -= visibleSegment;
-            if (scrollPosition  > endOfBars)
+            if (scrollPosition > endOfBars)
                 scrollPosition = endOfBars;
             if (scrollPosition < 0)
                 scrollPosition = 0;

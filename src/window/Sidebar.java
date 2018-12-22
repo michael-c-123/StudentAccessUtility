@@ -11,22 +11,21 @@ import java.util.List;
 /**
  * @author Michael
  */
-public class Sidebar implements Drawable {
+public class Sidebar {
     private List<Button> buttonList;
     public static final int BUTTON_SIZE = 30;
     public static final double SIZE_RATIO = .2;
 
-    public Sidebar(){
+    public Sidebar() {
         buttonList = new ArrayList<>();
     }
 
-    @Override
     public void drawUsing(Graphics g, DrawingPanel panel, boolean sidebarOn) {
         if (!sidebarOn)
             return;
 
         //update position
-        int w = (int) (panel.getWidth() *SIZE_RATIO);
+        int w = (int) (panel.getWidth() * SIZE_RATIO);
         for (Button button : buttonList) {
             button.setEnabled(sidebarOn);
             button.setRect(new Rectangle(button.getRect().x, button.getRect().y, w, button.getRect().height));
@@ -34,7 +33,7 @@ public class Sidebar implements Drawable {
 
         //draw
         g.setColor(Color.DARK_GRAY.darker());
-        g.fillRect(0, 0, (int) (panel.getWidth() *SIZE_RATIO), panel.getHeight()); //one fourth of screen
+        g.fillRect(0, 0, (int) (panel.getWidth() * SIZE_RATIO), panel.getHeight()); //one fourth of screen
         for (Button button : buttonList)
             button.draw(g);
     }
@@ -60,21 +59,6 @@ public class Sidebar implements Drawable {
         for (Button button : buttonList) {
             button.setVisible(enabled);
         }
-    }
-
-    @Override
-    public void scroll(int scrollAmount) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void scrollReset() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void setActive(boolean active) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }
