@@ -1,10 +1,6 @@
 
 package main;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,10 +20,6 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.ie.InternetExplorerOptions;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -45,22 +37,11 @@ public class WebAccessor {
     private static final String LOGIN = "https://pac.conroeisd.net/slogin.asp";
     private static String[] fields = new String[7]; //temporary fields save for updating
     private static final ChromeOptions OPTIONS;
-    private static final InternetExplorerOptions IE_OPTIONS;
 
     static {
         //set directory of ChromeDriver
         String projPath = System.getProperty("user.dir"); //user.dir is the directory property of the project
         System.setProperty("webdriver.chrome.driver", projPath + "/lib/chromedriver/chromedriver.exe");
-
-        DesiredCapabilities capabilities = DesiredCapabilities.internetExplorer();
-        capabilities.setCapability(InternetExplorerDriver.ENABLE_PERSISTENT_HOVERING, false);
-        capabilities.setCapability(InternetExplorerDriver.REQUIRE_WINDOW_FOCUS, false);
-        capabilities.setCapability(InternetExplorerDriver.NATIVE_EVENTS, false);
-        capabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
-        capabilities.setCapability(InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS, true);
-        capabilities.setJavascriptEnabled(false);
-        capabilities.setCapability(InternetExplorerDriver.INITIAL_BROWSER_URL, LOGIN);
-        IE_OPTIONS = new InternetExplorerOptions(capabilities);
 
         //set up Chrome options
         OPTIONS = new ChromeOptions();
@@ -100,7 +81,7 @@ public class WebAccessor {
                             ExpectedConditions.not(ExpectedConditions.urlMatches(Pattern.quote(LOGIN))), //successful
                             fieldsChanged(driver, fields) //fields are changed
                     ));
-                    driver.getCurrentUrl();
+                    driver.getCurrentUrl(); //idk why this is here
                 }
                 catch (StaleElementReferenceException e) {
                     if (driver.findElements(By.name("parentid")).isEmpty() //no userID field found
@@ -123,9 +104,9 @@ public class WebAccessor {
                     fields[0].toLowerCase(),
                     Integer.parseInt(fields[1]),
                     new GregorianCalendar(
-                            Integer.parseInt(fields[4]),
-                            Integer.parseInt(fields[2]) - 1, //because months start at zero
-                            Integer.parseInt(fields[3])),
+                            Integer.parseInt(fields[4]), //year
+                            Integer.parseInt(fields[2]) - 1, //months (start at 0, so subtract 1)
+                            Integer.parseInt(fields[3])), //day
                     Integer.parseInt(fields[5]),
                     Integer.parseInt(fields[6]));
             driver.switchTo().frame("main");
@@ -142,7 +123,6 @@ public class WebAccessor {
                 driver.quit();
         }
 
-        //TODO filter out non high school grade levels, loop back to login screen
         return profile;
     }
 
@@ -225,37 +205,22 @@ public class WebAccessor {
     private static void sendKeys(WebDriver driver, Profile p) throws NoSuchElementException {
         WebElement table = driver.findElement(By.cssSelector(
                 "body > font > center > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody"));
-        long time = System.currentTimeMillis(); //check time taken for each element filled
         //find all the elements
-        System.out.println(0);
         table.findElement(By.cssSelector(
                 "tr:nth-child(1) > td:nth-child(2) > input[type=\"text\"]")
         ).sendKeys(p.getFields()[0]);
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
         table.findElement(By.cssSelector(
                 "tr:nth-child(2) > td:nth-child(2) > input[type=\"password\"]")).sendKeys(p.getFields()[1]);
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
         new Select(table.findElement(By.cssSelector(
                 "tr:nth-child(3) > td:nth-child(2) > select:nth-child(1)"))).selectByValue(p.getFields()[2]);
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
         new Select(table.findElement(By.cssSelector(
                 "tr:nth-child(3) > td:nth-child(2) > select:nth-child(2)"))).selectByValue(p.getFields()[3]);
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
         new Select(table.findElement(By.cssSelector(
                 "tr:nth-child(3) > td:nth-child(2) > select:nth-child(3)"))).selectByValue(p.getFields()[4]);
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
         new Select(table.findElement(By.cssSelector(
                 "tr:nth-child(4) > td:nth-child(2) > select"))).selectByValue(p.getFields()[5]);
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
         new Select(table.findElement(By.cssSelector(
                 "tr:nth-child(5) > td:nth-child(2) > select"))).selectByValue(p.getFields()[6]);
-        System.out.println(System.currentTimeMillis() - time);
     }
 
     private static void updateReportCard(WebDriver driver, Profile profile) throws NoSuchElementException {
@@ -431,28 +396,4 @@ public class WebAccessor {
             };
         }
     }
-
-    public static boolean isInternetReachable() {
-        try {
-            //make a URL to a known source
-            URL url = new URL(LOGIN);
-
-            //open a connection to that source
-            HttpURLConnection urlConnect = (HttpURLConnection) url.openConnection();
-
-            //trying to retrieve data from the source. If there
-            //is no connection, this line will fail
-            urlConnect.getContent();
-        }
-        catch (UnknownHostException e) {
-            e.printStackTrace();
-            return false;
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
 }
