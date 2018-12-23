@@ -76,25 +76,19 @@ public class WebAccessor {
             driver = new ChromeDriver(OPTIONS);
             WebDriverWait wait = new WebDriverWait(driver, 86400);
             while (!loggedIn) {
-                try {
-                    wait.until(ExpectedConditions.or(
-                            ExpectedConditions.not(ExpectedConditions.urlMatches(Pattern.quote(LOGIN))), //successful
-                            fieldsChanged(driver, fields) //fields are changed
-                    ));
-                    driver.getCurrentUrl(); //idk why this is here
-                }
-                catch (StaleElementReferenceException e) {
-                    if (driver.findElements(By.name("parentid")).isEmpty() //no userID field found
-                            && !driver.getCurrentUrl().equals(HOME)) { //not currently on the login screen
-                        driver.navigate().refresh(); //refresh page
-                        continue;
-                    }
-                }
-                if (driver.getCurrentUrl().equalsIgnoreCase(HOME))
+                wait.until(ExpectedConditions.or(
+                        ExpectedConditions.not(ExpectedConditions.urlMatches(Pattern.quote(LOGIN))), //success or clicked away
+                        fieldsChanged(driver), //fields are changed
+                        closed()
+                ));
+                System.out.print("past wait: ");
+                System.out.println(driver.getCurrentUrl()+"####"+driver.getTitle());
+
+                if (driver.getCurrentUrl().equalsIgnoreCase(HOME)) //success
                     loggedIn = true;
-                else if (!driver.getCurrentUrl().equalsIgnoreCase(LOGIN))
+                else if (!driver.getCurrentUrl().equalsIgnoreCase(LOGIN)) //clicked away
                     driver.get(LOGIN);
-                else
+                else //fields changed
                     updateFields(driver);
             }
 
@@ -105,7 +99,7 @@ public class WebAccessor {
                     Integer.parseInt(fields[1]),
                     new GregorianCalendar(
                             Integer.parseInt(fields[4]), //year
-                            Integer.parseInt(fields[2]) - 1, //months (start at 0, so subtract 1)
+                            Integer.parseInt(fields[2]) - 1, //month (start at 0, so subtract 1)
                             Integer.parseInt(fields[3])), //day
                     Integer.parseInt(fields[5]),
                     Integer.parseInt(fields[6]));
@@ -367,33 +361,39 @@ public class WebAccessor {
             recursiveNavigateTables(profile, cenList.get(0), verify);
     }
 
-    private static ExpectedCondition<Boolean> fieldsChanged(WebDriver driver, String[] fields) throws NoSuchWindowException {
-        try {
-            WebElement[] elements = new WebElement[7];
-            elements[0] = driver.findElement(By.name("parentid"));
-            elements[1] = driver.findElement(By.name("parentnumber"));
-            elements[2] = driver.findElement(By.name("bdaymonth"));
-            elements[3] = driver.findElement(By.name("bday"));
-            elements[4] = driver.findElement(By.name("bdayyear"));
-            elements[5] = driver.findElement(By.name("grade"));
-            elements[6] = driver.findElement(By.name("building"));
-            ExpectedCondition<Boolean> condition = ExpectedConditions.not(
-                    ExpectedConditions.and(
-                            ExpectedConditions.attributeToBe(elements[0], "value", fields[0]),
-                            ExpectedConditions.attributeToBe(elements[1], "value", fields[1]),
-                            ExpectedConditions.attributeToBe(elements[2], "value", fields[2]),
-                            ExpectedConditions.attributeToBe(elements[3], "value", fields[3]),
-                            ExpectedConditions.attributeToBe(elements[4], "value", fields[4]),
-                            ExpectedConditions.attributeToBe(elements[5], "value", fields[5]),
-                            ExpectedConditions.attributeToBe(elements[6], "value", fields[6])
-                    ));
-            return condition;
-        }
-        catch (NoSuchElementException | StaleElementReferenceException e) {
-            System.out.println("TEST: not changed");
-            return (WebDriver f) -> {
+    private static ExpectedCondition<Boolean> fieldsChanged(WebDriver driver) {
+        WebElement[] elements = new WebElement[7];
+        elements[0] = driver.findElement(By.name("parentid"));
+        elements[1] = driver.findElement(By.name("parentnumber"));
+        elements[2] = driver.findElement(By.name("bdaymonth"));
+        elements[3] = driver.findElement(By.name("bday"));
+        elements[4] = driver.findElement(By.name("bdayyear"));
+        elements[5] = driver.findElement(By.name("grade"));
+        elements[6] = driver.findElement(By.name("building"));
+        ExpectedCondition<Boolean> condition = ExpectedConditions.not(
+                ExpectedConditions.and(
+                        ExpectedConditions.attributeToBe(elements[0], "value", fields[0]),
+                        ExpectedConditions.attributeToBe(elements[1], "value", fields[1]),
+                        ExpectedConditions.attributeToBe(elements[2], "value", fields[2]),
+                        ExpectedConditions.attributeToBe(elements[3], "value", fields[3]),
+                        ExpectedConditions.attributeToBe(elements[4], "value", fields[4]),
+                        ExpectedConditions.attributeToBe(elements[5], "value", fields[5]),
+                        ExpectedConditions.attributeToBe(elements[6], "value", fields[6])
+                ));
+        return condition;
+    }
+
+    private static ExpectedCondition<Boolean> closed() {
+        ExpectedCondition<Boolean> condition = (WebDriver driver) -> {
+            try {
+                driver.getTitle();
+                return true;
+            }
+            catch (Exception ex) {
+                System.out.println("CLOSED");
                 return false;
-            };
-        }
+            }
+        };
+        return ExpectedConditions.not(condition);
     }
 }
