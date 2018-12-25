@@ -20,27 +20,21 @@ public final class EndBar extends Bar {
 
     private Course course;
     private Map<String, Object> settings;
+    private final Grade[] grades;
 
     public EndBar(Course course, JPanel panel, Map<String, Object> settings) {
         super(null, panel);
         this.course = course;
         this.settings = settings;
+        grades = new Grade[]{
+            course.getCurrent(true), course.getCurrent(false),
+            course.getExam(), course.getSem()};
         initListeners();
         updateIcons();
     }
 
     private void initListeners() {
-        getButtons()[0].addActionListener(event -> {
-            if (course.getCurrent(false).isFixed()
-                    && course.getExam().isFixed()
-                    && course.getSem().isFixed()) {
-                JOptionPane.showMessageDialog(null,
-                        "Reset another controlled value to control this value.", "Deadlock", JOptionPane.WARNING_MESSAGE);
-            }
-            else {
-                showChangeWindow(course.getCurrent(true), "Control Current Grade");
-            }
-        });
+        getButtons()[0].addActionListener(event -> showChangeWindow(course.getCurrent(true), "Control Current Grade"));
         getButtons()[1].setEnabled(false);
         getButtons()[2].setEnabled(false);
         if (course.isOnM1())
@@ -52,13 +46,23 @@ public final class EndBar extends Bar {
     }
 
     private void showChangeWindow(Grade grade, String title) {
-        double start = grade.isEmpty() ? 100 : grade.getValue();
-        double input = WindowUtil.showSpinnerDialog(title,
-                start, 0, 120, .1, "0.0", true);
-        if (input >= 0)
-            grade.manipulate(input);
-        else if (input == WindowUtil.RESET)
-            grade.reset();
+        boolean deadlock = true;
+        for (Grade gr : grades)
+            if (gr != grade)
+                deadlock &= gr.isFixed();
+
+        if (deadlock)
+            JOptionPane.showMessageDialog(null,
+                    "Reset another controlled value to control this value.", "Deadlock", JOptionPane.WARNING_MESSAGE);
+        else {
+            double start = grade.isEmpty() ? 100 : grade.getValue();
+            double input = WindowUtil.showSpinnerDialog(title,
+                    start, 0, 120, .1, "0.0", true);
+            if (input >= 0)
+                grade.manipulate(input);
+            else if (input == WindowUtil.RESET)
+                grade.reset();
+        }
     }
 
     public void updateIcons() {
@@ -66,7 +70,7 @@ public final class EndBar extends Bar {
         if (course.getActualEstimate() == -1)
             OTHER = "NEXT/PREV";
         String[] labels = {"CURRENT", "MAJOR", "DAILY", OTHER, "EXAM", "SEMESTER"};
-        Grade[] grades = {course.getCurrent(true),
+        Grade[] gradeFields = {course.getCurrent(true),
             course.getMajor(),
             course.getDaily(),
             course.getCurrent(false),
@@ -77,7 +81,7 @@ public final class EndBar extends Bar {
             final int I = i;
             button.setIcon((Graphics g, int x, int y, int width, int height) -> {
                 int style = I == 0 ? Font.BOLD : Font.PLAIN;
-                Color textColor = grades[I].getModStatus() == Grade.REACTING
+                Color textColor = gradeFields[I].getModStatus() == Grade.REACTING
                         ? Grade.getColor(Grade.RESPONDING, settings) : Color.WHITE;
 
                 g.setFont(g.getFont().deriveFont(style, 13f));
@@ -86,7 +90,7 @@ public final class EndBar extends Bar {
 
                 g.setFont(g.getFont().deriveFont(Font.BOLD, 16));
                 g.setColor(textColor);
-                WindowUtil.drawCenteredString(g, grades[I].getFormattedString(),
+                WindowUtil.drawCenteredString(g, gradeFields[I].getFormattedString(),
                         x, y + height / 2, width, height / 2);
             });
         }

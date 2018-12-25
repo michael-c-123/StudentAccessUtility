@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import main.InfoPanel;
 import main.WindowUtil;
 import student.Course;
