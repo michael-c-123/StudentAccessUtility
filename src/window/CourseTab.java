@@ -75,7 +75,7 @@ public final class CourseTab implements Drawable {
             EntryGrade createdGrade = WindowUtil.showCreateDialog();
             if (createdGrade != null) {
                 course.addGrade(createdGrade);
-                updateBars(true);
+                updateBars(createdGrade.getModStatus() == Grade.RESPONDING);
             }
         });
         addButton.setEnabled(false);
@@ -96,7 +96,7 @@ public final class CourseTab implements Drawable {
                     null, options, options[0]);
             if (choice == 0) {
                 course.setMajorSplit(info.getCustomSplit());
-                updateBars(true);
+                updateBars(false);
             }
         });
         infoButton.setEnabled(false);
@@ -144,9 +144,8 @@ public final class CourseTab implements Drawable {
             if (grade.isCustom() && grade.isGrayed()) {
                 course.getGradeList().remove(i);
                 Bar removed = gradeBarList.remove(i);
-                for (Button button : removed.getButtons()) {
+                for (Button button : removed.getButtons())
                     button.kill();
-                }
                 doPositions = true;
                 course.update();
                 break;
@@ -171,20 +170,18 @@ public final class CourseTab implements Drawable {
 
         if (lockResponder) {
             Bar soleResponder = null;
-            boolean foundSoleResponder = false;
-            for (Bar bar : gradeBarList) {
+            for (Bar bar : gradeBarList)
                 if (bar.getGrade().getModStatus() == Grade.RESPONDING
                         && !bar.getGrade().isEmpty())
-                    if (foundSoleResponder)
-                        soleResponder = null;
-                    else {
+                    if (soleResponder == null)
                         soleResponder = bar;
-                        foundSoleResponder = true;
+                    else {
+                        soleResponder = null;
+                        break;
                     }
-            }
-            if (soleResponder != null)
+            if (soleResponder != null) //if there is only one responding grade, prevent it from being deleted
                 soleResponder.setPreventDelete(true);
-            else
+            else //otherwise return everything to normal
                 for (Bar bar : gradeBarList)
                     bar.setPreventDelete(false);
         }
