@@ -1,10 +1,6 @@
 
 package main;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,7 +12,6 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
@@ -24,10 +19,6 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.ie.InternetExplorerOptions;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -45,22 +36,11 @@ public class WebAccessor {
     private static final String LOGIN = "https://pac.conroeisd.net/slogin.asp";
     private static String[] fields = new String[7]; //temporary fields save for updating
     private static final ChromeOptions OPTIONS;
-    private static final InternetExplorerOptions IE_OPTIONS;
 
     static {
         //set directory of ChromeDriver
         String projPath = System.getProperty("user.dir"); //user.dir is the directory property of the project
         System.setProperty("webdriver.chrome.driver", projPath + "/lib/chromedriver/chromedriver.exe");
-
-        DesiredCapabilities capabilities = DesiredCapabilities.internetExplorer();
-        capabilities.setCapability(InternetExplorerDriver.ENABLE_PERSISTENT_HOVERING, false);
-        capabilities.setCapability(InternetExplorerDriver.REQUIRE_WINDOW_FOCUS, false);
-        capabilities.setCapability(InternetExplorerDriver.NATIVE_EVENTS, false);
-        capabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
-        capabilities.setCapability(InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS, true);
-        capabilities.setJavascriptEnabled(false);
-        capabilities.setCapability(InternetExplorerDriver.INITIAL_BROWSER_URL, LOGIN);
-        IE_OPTIONS = new InternetExplorerOptions(capabilities);
 
         //set up Chrome options
         OPTIONS = new ChromeOptions();
@@ -95,25 +75,19 @@ public class WebAccessor {
             driver = new ChromeDriver(OPTIONS);
             WebDriverWait wait = new WebDriverWait(driver, 86400);
             while (!loggedIn) {
-                try {
-                    wait.until(ExpectedConditions.or(
-                            ExpectedConditions.not(ExpectedConditions.urlMatches(Pattern.quote(LOGIN))), //successful
-                            fieldsChanged(driver, fields) //fields are changed
-                    ));
-                    driver.getCurrentUrl();
-                }
-                catch (StaleElementReferenceException e) {
-                    if (driver.findElements(By.name("parentid")).isEmpty() //no userID field found
-                            && !driver.getCurrentUrl().equals(HOME)) { //not currently on the login screen
-                        driver.navigate().refresh(); //refresh page
-                        continue;
-                    }
-                }
-                if (driver.getCurrentUrl().equalsIgnoreCase(HOME))
+                wait.until(ExpectedConditions.or(
+                        ExpectedConditions.not(ExpectedConditions.urlMatches(Pattern.quote(LOGIN))), //success or clicked away
+                        fieldsChanged(driver), //fields are changed
+                        closed()
+                ));
+                System.out.print("past wait: ");
+                System.out.println(driver.getCurrentUrl()+"####"+driver.getTitle());
+
+                if (driver.getCurrentUrl().equalsIgnoreCase(HOME)) //success
                     loggedIn = true;
-                else if (!driver.getCurrentUrl().equalsIgnoreCase(LOGIN))
+                else if (!driver.getCurrentUrl().equalsIgnoreCase(LOGIN)) //clicked away
                     driver.get(LOGIN);
-                else
+                else //fields changed
                     updateFields(driver);
             }
 
@@ -123,9 +97,9 @@ public class WebAccessor {
                     fields[0].toLowerCase(),
                     Integer.parseInt(fields[1]),
                     new GregorianCalendar(
-                            Integer.parseInt(fields[4]),
-                            Integer.parseInt(fields[2]) - 1, //because months start at zero
-                            Integer.parseInt(fields[3])),
+                            Integer.parseInt(fields[4]), //year
+                            Integer.parseInt(fields[2]) - 1, //month (start at 0, so subtract 1)
+                            Integer.parseInt(fields[3])), //day
                     Integer.parseInt(fields[5]),
                     Integer.parseInt(fields[6]));
             driver.switchTo().frame("main");
@@ -142,7 +116,6 @@ public class WebAccessor {
                 driver.quit();
         }
 
-        //TODO filter out non high school grade levels, loop back to login screen
         return profile;
     }
 
@@ -225,37 +198,22 @@ public class WebAccessor {
     private static void sendKeys(WebDriver driver, Profile p) throws NoSuchElementException {
         WebElement table = driver.findElement(By.cssSelector(
                 "body > font > center > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody"));
-        long time = System.currentTimeMillis(); //check time taken for each element filled
         //find all the elements
-        System.out.println(0);
         table.findElement(By.cssSelector(
                 "tr:nth-child(1) > td:nth-child(2) > input[type=\"text\"]")
         ).sendKeys(p.getFields()[0]);
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
         table.findElement(By.cssSelector(
                 "tr:nth-child(2) > td:nth-child(2) > input[type=\"password\"]")).sendKeys(p.getFields()[1]);
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
         new Select(table.findElement(By.cssSelector(
                 "tr:nth-child(3) > td:nth-child(2) > select:nth-child(1)"))).selectByValue(p.getFields()[2]);
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
         new Select(table.findElement(By.cssSelector(
                 "tr:nth-child(3) > td:nth-child(2) > select:nth-child(2)"))).selectByValue(p.getFields()[3]);
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
         new Select(table.findElement(By.cssSelector(
                 "tr:nth-child(3) > td:nth-child(2) > select:nth-child(3)"))).selectByValue(p.getFields()[4]);
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
         new Select(table.findElement(By.cssSelector(
                 "tr:nth-child(4) > td:nth-child(2) > select"))).selectByValue(p.getFields()[5]);
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
         new Select(table.findElement(By.cssSelector(
                 "tr:nth-child(5) > td:nth-child(2) > select"))).selectByValue(p.getFields()[6]);
-        System.out.println(System.currentTimeMillis() - time);
     }
 
     private static void updateReportCard(WebDriver driver, Profile profile) throws NoSuchElementException {
@@ -402,57 +360,39 @@ public class WebAccessor {
             recursiveNavigateTables(profile, cenList.get(0), verify);
     }
 
-    private static ExpectedCondition<Boolean> fieldsChanged(WebDriver driver, String[] fields) throws NoSuchWindowException {
-        try {
-            WebElement[] elements = new WebElement[7];
-            elements[0] = driver.findElement(By.name("parentid"));
-            elements[1] = driver.findElement(By.name("parentnumber"));
-            elements[2] = driver.findElement(By.name("bdaymonth"));
-            elements[3] = driver.findElement(By.name("bday"));
-            elements[4] = driver.findElement(By.name("bdayyear"));
-            elements[5] = driver.findElement(By.name("grade"));
-            elements[6] = driver.findElement(By.name("building"));
-            ExpectedCondition<Boolean> condition = ExpectedConditions.not(
-                    ExpectedConditions.and(
-                            ExpectedConditions.attributeToBe(elements[0], "value", fields[0]),
-                            ExpectedConditions.attributeToBe(elements[1], "value", fields[1]),
-                            ExpectedConditions.attributeToBe(elements[2], "value", fields[2]),
-                            ExpectedConditions.attributeToBe(elements[3], "value", fields[3]),
-                            ExpectedConditions.attributeToBe(elements[4], "value", fields[4]),
-                            ExpectedConditions.attributeToBe(elements[5], "value", fields[5]),
-                            ExpectedConditions.attributeToBe(elements[6], "value", fields[6])
-                    ));
-            return condition;
-        }
-        catch (NoSuchElementException | StaleElementReferenceException e) {
-            System.out.println("TEST: not changed");
-            return (WebDriver f) -> {
+    private static ExpectedCondition<Boolean> fieldsChanged(WebDriver driver) {
+        WebElement[] elements = new WebElement[7];
+        elements[0] = driver.findElement(By.name("parentid"));
+        elements[1] = driver.findElement(By.name("parentnumber"));
+        elements[2] = driver.findElement(By.name("bdaymonth"));
+        elements[3] = driver.findElement(By.name("bday"));
+        elements[4] = driver.findElement(By.name("bdayyear"));
+        elements[5] = driver.findElement(By.name("grade"));
+        elements[6] = driver.findElement(By.name("building"));
+        ExpectedCondition<Boolean> condition = ExpectedConditions.not(
+                ExpectedConditions.and(
+                        ExpectedConditions.attributeToBe(elements[0], "value", fields[0]),
+                        ExpectedConditions.attributeToBe(elements[1], "value", fields[1]),
+                        ExpectedConditions.attributeToBe(elements[2], "value", fields[2]),
+                        ExpectedConditions.attributeToBe(elements[3], "value", fields[3]),
+                        ExpectedConditions.attributeToBe(elements[4], "value", fields[4]),
+                        ExpectedConditions.attributeToBe(elements[5], "value", fields[5]),
+                        ExpectedConditions.attributeToBe(elements[6], "value", fields[6])
+                ));
+        return condition;
+    }
+
+    private static ExpectedCondition<Boolean> closed() {
+        ExpectedCondition<Boolean> condition = (WebDriver driver) -> {
+            try {
+                driver.getTitle();
+                return true;
+            }
+            catch (Exception ex) {
+                System.out.println("CLOSED");
                 return false;
-            };
-        }
+            }
+        };
+        return ExpectedConditions.not(condition);
     }
-
-    public static boolean isInternetReachable() {
-        try {
-            //make a URL to a known source
-            URL url = new URL(LOGIN);
-
-            //open a connection to that source
-            HttpURLConnection urlConnect = (HttpURLConnection) url.openConnection();
-
-            //trying to retrieve data from the source. If there
-            //is no connection, this line will fail
-            urlConnect.getContent();
-        }
-        catch (UnknownHostException e) {
-            e.printStackTrace();
-            return false;
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
 }

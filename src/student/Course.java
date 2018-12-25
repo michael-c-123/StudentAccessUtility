@@ -15,8 +15,8 @@ public class Course implements Serializable, Comparable<Course> {
     private String name;
     private final int period;
     private ArrayList<EntryGrade> gradeList;
-    private Grade exam, m1, m2, sem;
-    private Grade major, daily;
+    private final Grade exam, m1, m2, sem;
+    private final Grade major, daily;
     private double majorSplit;
     private boolean onM1 = true;
     private int actualEstimate = -1;
@@ -236,9 +236,8 @@ public class Course implements Serializable, Comparable<Course> {
             calcSplit(true);
             calcSplit(false);
             double result; //CALC C
-            if (major.isEmpty() ^ daily.isEmpty()) {
+            if (major.isEmpty() ^ daily.isEmpty())
                 result = daily.isEmpty() ? major.getValue() : daily.getValue();
-            }
             else
                 result = major.getValue() * majorSplit + daily.getValue() * (1 - majorSplit);
             current.reset();

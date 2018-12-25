@@ -6,20 +6,10 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.Map;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
 import main.InfoPanel;
 import main.WindowUtil;
 import student.Course;
@@ -29,10 +19,12 @@ import student.Grade;
 /**
  * @author Michael
  */
-public final class CourseTab extends Button implements Drawable {
+public final class CourseTab implements Drawable {
     public static final int TITLE_HEIGHT = 50; //how much space the title heading takes up
+    private final Button tab;
+    private final DrawingPanel panel;
     private final Bar labelBar;
-    private final Bar endBar;
+    private final EndBar endBar;
     private ArrayList<Bar> gradeBarList;
 
     private Button addButton;
@@ -41,25 +33,28 @@ public final class CourseTab extends Button implements Drawable {
     private Course course;
     private Map<String, Object> settings;
 
-    public CourseTab(Course course, Map<String, Object> settings, JPanel panel, //panel is always the drawing panel
-            Rectangle rect, String text, Color color, ButtonPlan plan) {
-        super(panel, rect, text, color, plan);
+    public CourseTab(Course course, Map<String, Object> settings, DrawingPanel panel,
+            Rectangle rect, String text, Color color, Button.ButtonPlan plan) {
+        this.panel = panel;
+        tab = new Button(panel, rect, text, color, plan);
         gradeBarList = new ArrayList<>();
         this.course = course;
         this.settings = settings;
 
         final int SIZE = (int) settings.get("grade bar size");
         labelBar = new Bar(new String[]{"", "Date", "Name", "Wt", "Type", "Grade"},
-                panel, settings);
+                panel);
         labelBar.setDimensions(0, TITLE_HEIGHT, 0, SIZE); //0s are placeholders, will be replaced by drawUsing()
         labelBar.setEnabled(false);
 
-        endBar = new Bar(new String[]{"", "", "", "", "", ""}, panel, settings);
+        endBar = new EndBar(course, panel, settings);
         endBar.setDimensions(0, 0, 0, SIZE * 2 + 1);
         for (Button button : endBar.getButtons()) {
             button.setColor((Color) settings.get("color dark"));
+            button.addActionListener(event -> {
+                updateBars(true);
+            });
         }
-        initEndBarListeners();
 
         initAddButton();
         initInfoButton();
@@ -77,82 +72,13 @@ public final class CourseTab extends Button implements Drawable {
                 (Button.ButtonPlan) settings.get("style"));
         addButton.setFontScale(.5);
         addButton.addActionListener(event -> {
-            //radio buttons, manip/response
-            JRadioButton manipButton = new JRadioButton("Control");
-            JRadioButton respoButton = new JRadioButton("Response");
-            ButtonGroup groupMR = new ButtonGroup();
-            groupMR.add(manipButton);
-            groupMR.add(respoButton);
-            manipButton.setSelected(true);
-            JPanel radioMR = new JPanel();
-            radioMR.add(manipButton);
-            radioMR.add(respoButton);
-
-            //radio buttons, major/daily
-            JRadioButton majorButton = new JRadioButton("Major");
-            JRadioButton dailyButton = new JRadioButton("Daily");
-            ButtonGroup groupMD = new ButtonGroup();
-            groupMD.add(majorButton);
-            groupMD.add(dailyButton);
-            majorButton.setSelected(true);
-            JPanel radioMD = new JPanel();
-            radioMD.add(majorButton);
-            radioMD.add(dailyButton);
-
-            JPanel namePanel = new JPanel();
-            namePanel.add(new JLabel("Name"));
-            JTextField nameField = new JTextField("Custom Grade", 20);
-            nameField.addFocusListener(new FocusAdapter() {
-                @Override
-                public void focusGained(FocusEvent fe) {
-                    nameField.selectAll();
-                }
-            });
-            namePanel.add(nameField);
-
-            JSpinner weightSpinner = WindowUtil.makeSpinner(null, 1, .05, 5, .05, "0.00");
-            JPanel weightPanel = new JPanel();
-            weightPanel.add(new JLabel("Weight"));
-            weightPanel.add(weightSpinner);
-
-            JSpinner gradeSpinner = WindowUtil.makeSpinner(null, 5, 0, 6, .01, "0.00");
-            respoButton.addItemListener(e -> {
-                boolean enable = e.getStateChange() != ItemEvent.SELECTED;
-                gradeSpinner.setEnabled(enable);
-            });
-            JPanel gradePanel = new JPanel();
-            gradePanel.add(new JLabel("Grade"));
-            gradePanel.add(gradeSpinner);
-
-            JPanel msgPanel = new JPanel();
-            BoxLayout layout = new BoxLayout(msgPanel, BoxLayout.Y_AXIS);
-            msgPanel.setLayout(layout);
-            msgPanel.add(radioMR);
-            msgPanel.add(namePanel);
-            msgPanel.add(weightPanel);
-            msgPanel.add(radioMD);
-            msgPanel.add(gradePanel);
-
-            JButton[] options = WindowUtil.makeButtons("OK", "Cancel");
-
-            int option = JOptionPane.showOptionDialog(null, //parent
-                    msgPanel, //message
-                    "Create New Grade", //title
-                    JOptionPane.DEFAULT_OPTION, //option type
-                    JOptionPane.PLAIN_MESSAGE, //message type
-                    null, options, options[0]); //icon, options, initial value
-
-            if (option == 0) { //OK button clicked
-                int modStatus = manipButton.isSelected() ? Grade.MANIPULATED : Grade.RESPONDING;
-                double grade = manipButton.isSelected() ? (Double) gradeSpinner.getValue() : Grade.NO_VALUE;
-                course.addGrade(new EntryGrade(modStatus,
-                        nameField.getText().trim(), majorButton.isSelected(),
-                        (Double) weightSpinner.getValue(), grade));
-                updateBars(true);
+            EntryGrade createdGrade = WindowUtil.showCreateDialog();
+            if (createdGrade != null) {
+                course.addGrade(createdGrade);
+                updateBars(createdGrade.getModStatus() == Grade.RESPONDING);
             }
         });
         addButton.setEnabled(false);
-
     }
 
     private void initInfoButton() {
@@ -170,43 +96,14 @@ public final class CourseTab extends Button implements Drawable {
                     null, options, options[0]);
             if (choice == 0) {
                 course.setMajorSplit(info.getCustomSplit());
-                updateBars(true);
+                updateBars(false);
             }
         });
         infoButton.setEnabled(false);
     }
 
-    private void initEndBarListeners() {
-        endBar.getButtons()[0].addActionListener(event -> {
-            if (course.getCurrent(false).isFixed()
-                    && course.getExam().isFixed()
-                    && course.getSem().isFixed()) {
-                JOptionPane.showMessageDialog(null,
-                        "Reset another controlled value to control this value.", "Deadlock", JOptionPane.WARNING_MESSAGE);
-            }
-            else {
-                showChangeWindow(course.getCurrent(true), "Control Current Grade");
-            }
-        });
-        endBar.getButtons()[1].setEnabled(false);
-        endBar.getButtons()[2].setEnabled(false);
-        if (course.isOnM1())
-            endBar.getButtons()[3].addActionListener(event -> showChangeWindow(course.getCurrent(false), "Control Next Quarter Grade"));
-        else
-            endBar.getButtons()[3].setEnabled(false);
-        endBar.getButtons()[4].addActionListener(event -> showChangeWindow(course.getExam(), "Control Exam Grade"));
-        endBar.getButtons()[5].addActionListener(event -> showChangeWindow(course.getSem(), "Control Semester Grade"));
-    }
-
-    private void showChangeWindow(Grade grade, String title) {
-        double start = grade.isEmpty() ? 100 : grade.getValue();
-        double input = WindowUtil.showSpinnerDialog(title,
-                start, 0, 120, .1, "0.0", true);
-        if (input >= 0)
-            grade.manipulate(input);
-        else if (input == WindowUtil.RESET)
-            grade.reset();
-        updateBars(true);
+    public Button getTab() {
+        return tab;
     }
 
     public Button getAddButton() {
@@ -222,14 +119,17 @@ public final class CourseTab extends Button implements Drawable {
         course.update();
 
         boolean doPositions = false;
+
+        //update colors
         endBar.getButtons()[0].setColor(Grade.getColorDark(
-                course.getCurrent(true).getModStatus(), settings)); //update color
+                course.getCurrent(true).getModStatus(), settings));
         endBar.getButtons()[3].setColor(Grade.getColorDark(
                 course.getCurrent(false).getModStatus(), settings));
         endBar.getButtons()[4].setColor(Grade.getColorDark(
                 course.getExam().getModStatus(), settings));
         endBar.getButtons()[5].setColor(Grade.getColorDark(
                 course.getSem().getModStatus(), settings));
+        endBar.updateIcons();
 
         //put last grade in
         if (course.getGradeList().size() > gradeBarList.size()) {
@@ -244,44 +144,17 @@ public final class CourseTab extends Button implements Drawable {
             if (grade.isCustom() && grade.isGrayed()) {
                 course.getGradeList().remove(i);
                 Bar removed = gradeBarList.remove(i);
-                for (Button button : removed.getButtons()) {
+                for (Button button : removed.getButtons())
                     button.kill();
-                }
                 doPositions = true;
                 course.update();
                 break;
             }
         }
 
-        for (Bar bar : gradeBarList) {
+        //update texts of grade bars
+        for (Bar bar : gradeBarList)
             bar.updateText();
-        }
-
-        if (lockResponder) {
-            Bar soleResponder = null;
-            boolean foundSoleResponder = false;
-            for (Bar bar : gradeBarList) {
-                if (bar.getGrade().getModStatus() == Grade.RESPONDING
-                        && !bar.getGrade().isEmpty()) {
-                    if (foundSoleResponder) {
-                        soleResponder = null;
-                    }
-                    else {
-                        soleResponder = bar;
-                        foundSoleResponder = true;
-                    }
-                }
-            }
-            if (soleResponder != null) {
-                soleResponder.setPreventDelete(true);
-                System.out.println("locked");
-            }
-            else {
-                for (Bar bar : gradeBarList)
-                    bar.setPreventDelete(false);
-                System.out.println("unlocked");
-            }
-        }
 
         //update positions
         if (doPositions) {
@@ -293,6 +166,24 @@ public final class CourseTab extends Button implements Drawable {
                 bar.setInitialScroll(vertPosition);
                 vertPosition += SIZE + 1; //+1 for small gaps b/t bars
             }
+        }
+
+        if (lockResponder) {
+            Bar soleResponder = null;
+            for (Bar bar : gradeBarList)
+                if (bar.getGrade().getModStatus() == Grade.RESPONDING
+                        && !bar.getGrade().isEmpty())
+                    if (soleResponder == null)
+                        soleResponder = bar;
+                    else {
+                        soleResponder = null;
+                        break;
+                    }
+            if (soleResponder != null) //if there is only one responding grade, prevent it from being deleted
+                soleResponder.setPreventDelete(true);
+            else //otherwise return everything to normal
+                for (Bar bar : gradeBarList)
+                    bar.setPreventDelete(false);
         }
     }
 
@@ -310,7 +201,6 @@ public final class CourseTab extends Button implements Drawable {
 
     @Override
     public void drawUsing(Graphics g, DrawingPanel panel, boolean sidebarOn) {
-        //FIXME refractor to separate into helper method update() (which updates position, etc) and drawing stuff only in this method
         int x, w;
         if (sidebarOn) {
             x = (int) (panel.getWidth() * Sidebar.SIZE_RATIO) + 1;
@@ -345,67 +235,18 @@ public final class CourseTab extends Button implements Drawable {
 
         labelBar.draw(g);
 
-        drawEndBar(g, x, END_Y, w, SIZE);
+        endBar.setDimensions(x, END_Y + 1, w, endBar.getH());
+        endBar.draw(g);
 
         //draw title bar
         g.setColor(DrawingPanel.BACKGROUND);
         g.fillRect(x, 0, w, TITLE_HEIGHT);
-        g.setFont(new Font(g.getFont().getName(), Font.BOLD, 36));
+        g.setFont(g.getFont().deriveFont(Font.BOLD, 36));
         g.setColor(Color.WHITE);
         WindowUtil.drawCenteredString(g, course.getName(), x, 0, w, TITLE_HEIGHT);
 
         addButton.draw(g);
         infoButton.draw(g);
-    }
-
-    private void drawEndBar(Graphics g, int x, int END_Y, int w, int SIZE) {
-        Rectangle[] rects = endBar.setDimensionsForEndBar(x, END_Y + 1, w, endBar.getH());
-        Rectangle[] labelRects = new Rectangle[6];
-        Rectangle[] fieldRects = new Rectangle[6];
-        for (int i = 0; i < rects.length; i++) {
-            Rectangle r = rects[i];
-            labelRects[i] = new Rectangle(r.x, r.y, r.width, r.height / 2);
-            fieldRects[i] = new Rectangle(r.x, r.y + SIZE, r.width, r.height / 2);
-        }
-
-        g.setColor(DrawingPanel.BACKGROUND);
-        g.fillRect(x, END_Y, w, SIZE * 2 + 1);
-        g.setColor(Color.WHITE);
-
-        endBar.draw(g);
-
-        WindowUtil.drawCenteredString(g, "MAJOR", labelRects[1]);
-        WindowUtil.drawCenteredString(g, "DAILY", labelRects[2]);
-        String desc = course.isOnM1() ? "NEXT" : "PREV";
-        if (course.getActualEstimate() == -1)
-            desc = "NEXT/PREV";
-        WindowUtil.drawCenteredString(g, desc + " QUARTER", labelRects[3]);
-        WindowUtil.drawCenteredString(g, "EXAM", labelRects[4]);
-        WindowUtil.drawCenteredString(g, "SEMESTER", labelRects[5]);
-
-        Font orig = g.getFont();
-        g.setFont(new Font(orig.getFontName(), Font.BOLD, orig.getSize()));
-        WindowUtil.drawCenteredString(g, "CURRENT", labelRects[0]);
-        g.setFont(new Font(orig.getFontName(), Font.BOLD, 16));
-
-        if (course.getCurrent(true).getModStatus() == Grade.REACTING)
-            g.setColor(Grade.getColor(Grade.RESPONDING, settings));
-        WindowUtil.drawCenteredString(g, course.getCurrent(true).getFormattedString(), fieldRects[0]);
-        g.setColor(Color.WHITE);
-
-        if (course.getMajor().getModStatus() == Grade.REACTING)
-            g.setColor(Grade.getColor(Grade.RESPONDING, settings));
-        WindowUtil.drawCenteredString(g, course.getMajor().getFormattedString(), fieldRects[1]);
-        g.setColor(Color.WHITE);
-
-        if (course.getDaily().getModStatus() == Grade.REACTING)
-            g.setColor(Grade.getColor(Grade.RESPONDING, settings));
-        WindowUtil.drawCenteredString(g, course.getDaily().getFormattedString(), fieldRects[2]);
-        g.setColor(Color.WHITE);
-
-        WindowUtil.drawCenteredString(g, course.getCurrent(false).getFormattedString(), fieldRects[3]);
-        WindowUtil.drawCenteredString(g, course.getExam().getFormattedString(), fieldRects[4]);
-        WindowUtil.drawCenteredString(g, course.getSem().getFormattedString(), fieldRects[5]);
     }
 
     private int scrollPosition;
@@ -417,12 +258,12 @@ public final class CourseTab extends Button implements Drawable {
             scrollPosition = 0;
         else {
             final int SIZE = (int) settings.get("grade bar size");
-            int endOfBars = gradeBarList.size() * (SIZE + 1); // TODO make this accurate and stop scrolling at the correct location
+            int endOfBars = gradeBarList.size() * (SIZE + 1);
             int visibleSegment = panel.getHeight();
-            visibleSegment -= TITLE_HEIGHT + SIZE*3;
+            visibleSegment -= TITLE_HEIGHT + SIZE * 3;
 
             endOfBars -= visibleSegment;
-            if (scrollPosition  > endOfBars)
+            if (scrollPosition > endOfBars)
                 scrollPosition = endOfBars;
             if (scrollPosition < 0)
                 scrollPosition = 0;
@@ -451,9 +292,7 @@ public final class CourseTab extends Button implements Drawable {
         for (int i = 0; i < buttons.length; i++) {
             final int index = i;
             if (i != 1 && i != 2)
-                buttons[i].addActionListener(event -> {
-                    updateBars(index == 0);
-                });
+                buttons[i].addActionListener(event -> updateBars(index == 0));
         }
     }
 }
