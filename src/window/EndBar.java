@@ -27,7 +27,9 @@ public final class EndBar extends Bar {
         this.course = course;
         this.settings = settings;
         grades = new Grade[]{
-            course.getCurrent(true), course.getCurrent(false),
+            course.getCurrent(true),
+            course.getMajor(), course.getDaily(),
+            course.getCurrent(false),
             course.getExam(), course.getSem()};
         initListeners();
         updateIcons();
@@ -49,7 +51,9 @@ public final class EndBar extends Bar {
         boolean deadlock = true;
         for (Grade gr : grades)
             if (gr != grade)
-                deadlock &= gr.isFixed();
+                deadlock &= gr.isFixed(); //deadlock occurs when all other grades are fixed
+        if (grade != grades[0])
+            deadlock &= grades[0].getModStatus() == Grade.MANIPULATED; //current must also be manipulated
 
         if (deadlock)
             JOptionPane.showMessageDialog(null,
@@ -70,18 +74,12 @@ public final class EndBar extends Bar {
         if (course.getActualEstimate() == -1)
             OTHER = "NEXT/PREV";
         String[] labels = {"CURRENT", "MAJOR", "DAILY", OTHER, "EXAM", "SEMESTER"};
-        Grade[] gradeFields = {course.getCurrent(true),
-            course.getMajor(),
-            course.getDaily(),
-            course.getCurrent(false),
-            course.getExam(),
-            course.getSem()};
         for (int i = 0; i < getButtons().length; i++) {
             Button button = getButtons()[i];
             final int I = i;
             button.setIcon((Graphics g, int x, int y, int width, int height) -> {
                 int style = I == 0 ? Font.BOLD : Font.PLAIN;
-                Color textColor = gradeFields[I].getModStatus() == Grade.REACTING
+                Color textColor = grades[I].getModStatus() == Grade.REACTING
                         ? Grade.getColor(Grade.RESPONDING, settings) : Color.WHITE;
 
                 g.setFont(g.getFont().deriveFont(style, 13f));
@@ -90,7 +88,7 @@ public final class EndBar extends Bar {
 
                 g.setFont(g.getFont().deriveFont(Font.BOLD, 16));
                 g.setColor(textColor);
-                WindowUtil.drawCenteredString(g, gradeFields[I].getFormattedString(),
+                WindowUtil.drawCenteredString(g, grades[I].getFormattedString(),
                         x, y + height / 2, width, height / 2);
             });
         }

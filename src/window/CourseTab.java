@@ -74,7 +74,7 @@ public final class CourseTab implements Drawable {
         addButton.addActionListener(event -> {
             EntryGrade createdGrade = WindowUtil.showCreateDialog();
             if (createdGrade != null) {
-                addGrade(createdGrade);
+                course.addGrade(createdGrade);
                 updateBars(true);
             }
         });
@@ -100,17 +100,6 @@ public final class CourseTab implements Drawable {
             }
         });
         infoButton.setEnabled(false);
-    }
-
-    private void showChangeWindow(Grade grade, String title) {
-        double start = grade.isEmpty() ? 100 : grade.getValue();
-        double input = WindowUtil.showSpinnerDialog(title,
-                start, 0, 120, .1, "0.0", true);
-        if (input >= 0)
-            grade.manipulate(input);
-        else if (input == WindowUtil.RESET)
-            grade.reset();
-        updateBars(true);
     }
 
     public Button getTab() {
@@ -140,6 +129,7 @@ public final class CourseTab implements Drawable {
                 course.getExam().getModStatus(), settings));
         endBar.getButtons()[5].setColor(Grade.getColorDark(
                 course.getSem().getModStatus(), settings));
+        endBar.updateIcons();
 
         //put last grade in
         if (course.getGradeList().size() > gradeBarList.size()) {
@@ -249,7 +239,6 @@ public final class CourseTab implements Drawable {
         labelBar.draw(g);
 
         endBar.setDimensions(x, END_Y + 1, w, endBar.getH());
-        endBar.updateIcons();
         endBar.draw(g);
 
         //draw title bar
@@ -306,9 +295,7 @@ public final class CourseTab implements Drawable {
         for (int i = 0; i < buttons.length; i++) {
             final int index = i;
             if (i != 1 && i != 2)
-                buttons[i].addActionListener(event -> {
-                    updateBars(index == 0);
-                });
+                buttons[i].addActionListener(event -> updateBars(index == 0));
         }
     }
 }
