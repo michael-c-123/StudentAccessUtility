@@ -19,7 +19,7 @@ import student.Grade;
 /**
  * @author Michael
  */
-public final class Bar {
+public class Bar {
     private final Button[] buttons;
     private int x, y, w, h;
     private int initialScroll; //remembers its initial position before scrolling
@@ -39,7 +39,7 @@ public final class Bar {
         g.drawOval(x + w / 4, y + w / 4, w / 2, w / 2); //circle
     };
 
-    public Bar(String[] text, JPanel panel, Map<String, Object> settings) {
+    public Bar(String[] text, JPanel panel) {
         buttons = new Button[6]; //gray, date, name, weight, major, grade
         //initialize accordingly
         for (int i = 0; i < buttons.length; i++) {
@@ -64,9 +64,6 @@ public final class Bar {
         buttons = new Button[6]; //gray, date, name, weight, major, grade
         for (int i = 0; i < buttons.length; i++)
             buttons[i] = new Button(panel, new Rectangle(), "", barColor, (ButtonPlan) settings.get("style"));
-//        char c = grade.isCustom() ? 'X' : '\u25ef';
-//        buttons[0].setText(""+c);
-//        buttons[0].setFont(new Font("Courier", Font.BOLD, 12));
         Button.Icon icon;
         if (grade.isCustom())
             icon = DELETE;
@@ -107,7 +104,9 @@ public final class Bar {
                 setGray = false;
                 if (preventDelete) {
                     JOptionPane.showMessageDialog(null,
-                            "You cannot delete this grade while the Current Grade is controlled.", "Deadlock", JOptionPane.WARNING_MESSAGE);
+                            "You cannot delete this grade while CURRENT grade "
+                            + "is controlled.", "Deadlock",
+                            JOptionPane.WARNING_MESSAGE);
                 }
                 else {
                     int option = JOptionPane.showConfirmDialog(null,
@@ -200,7 +199,7 @@ public final class Bar {
         return grade;
     }
 
-    public void updateText() {
+    public final void updateText() {
         if (grade.isCustom()) {
             buttons[1].setText(grade.getModStatus() == Grade.MANIPULATED ? "CONTROL" : "RESPONSE");
         }
@@ -346,5 +345,4 @@ public final class Bar {
                 if (button != null)
                     button.setEnabled(false);
     }
-
 }
