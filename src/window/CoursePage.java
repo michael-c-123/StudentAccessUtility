@@ -19,7 +19,7 @@ import student.Grade;
 /**
  * @author Michael
  */
-public final class CourseTab implements Drawable {
+public final class CoursePage implements Page {
     public static final int TITLE_HEIGHT = 50; //how much space the title heading takes up
     private final Button tab;
     private final DrawingPanel panel;
@@ -33,10 +33,10 @@ public final class CourseTab implements Drawable {
     private Course course;
     private Map<String, Object> settings;
 
-    public CourseTab(Course course, Map<String, Object> settings, DrawingPanel panel,
-            Rectangle rect, String text, Color color, Button.ButtonPlan plan) {
+    public CoursePage(Course course, Map<String, Object> settings, DrawingPanel panel) {
         this.panel = panel;
-        tab = new Button(panel, rect, text, color, plan);
+        tab = new Button(panel, new Rectangle(), course.getName(),
+                (Color) settings.get("color dark"), (Button.ButtonPlan) settings.get("style"));
         gradeBarList = new ArrayList<>();
         this.course = course;
         this.settings = settings;
