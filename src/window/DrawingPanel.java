@@ -22,7 +22,7 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
 
     private Profile profile;
 
-    private Drawable currentPage;
+    private Page currentPage;
     private Sidebar sidebar;
     private boolean sidebarOn;
     private Button sidebarButton;
@@ -46,7 +46,7 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
         setBackground(BACKGROUND);
         sidebar = new Sidebar();
         sidebarButton = new Button(this,
-                new Rectangle(0, 0, CourseTab.TITLE_HEIGHT, CourseTab.TITLE_HEIGHT),
+                new Rectangle(0, 0, CoursePage.TITLE_HEIGHT, CoursePage.TITLE_HEIGHT),
                 "", (Color) this.profile.getSettings().get("color dark"), Button.STANDARD);
         sidebarButton.setIcon(LEFT);
 
@@ -78,13 +78,16 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
                     if (prev >= 0)
                         sidebar.getButtonList().get(prev).doClick();
                 }
-                else if (currentPage instanceof CourseTab) {
-                    CourseTab tab = (CourseTab) currentPage;
+                else if (currentPage instanceof CoursePage) {
+                    CoursePage tab = (CoursePage) currentPage;
                     if (ke.isControlDown()) {
                         if (ke.getKeyCode() == KeyEvent.VK_N)
                             tab.getAddButton().doClick();
                         else if (ke.getKeyCode() == KeyEvent.VK_I)
                             tab.getInfoButton().doClick();
+                        else if (ke.getKeyCode() == KeyEvent.VK_BACK_SPACE
+                                || ke.getKeyCode() == KeyEvent.VK_DELETE)
+                            tab.getResetButton().doClick();
                     }
                     else {
                         int scrollBy;
@@ -126,8 +129,7 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
 
     //called when profile's courses are read to be displayed
     private void addCourse(Course course) {
-        CourseTab tab = new CourseTab(course, profile.getSettings(), this,
-                new Rectangle(), course.getName(), new Color(100, 100, 100), Button.STANDARD);
+        CoursePage tab = new CoursePage(course, profile.getSettings(), this);
         tab.getTab().addActionListener((ActionEvent ae) -> {
             changePage(tab);
         });
@@ -140,7 +142,7 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
             tab.setActive(false);
     }
 
-    private void changePage(Drawable page) {
+    private void changePage(Page page) {
         if (currentPage != null)
             currentPage.setActive(false);
         currentPage = page;

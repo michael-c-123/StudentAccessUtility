@@ -12,7 +12,7 @@ import java.awt.Graphics;
  *
  * @author Michael
  */
-public interface Drawable {
+public interface Page {
     void drawUsing(Graphics g, DrawingPanel panel, boolean sidebarOn);
     void scroll(int scrollAmount);
     void scrollReset();

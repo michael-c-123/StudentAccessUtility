@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.ListIterator;
 import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -19,7 +20,7 @@ import student.Grade;
 /**
  * @author Michael
  */
-public final class CourseTab implements Drawable {
+public final class CoursePage implements Page {
     public static final int TITLE_HEIGHT = 50; //how much space the title heading takes up
     private final Button tab;
     private final DrawingPanel panel;
@@ -27,16 +28,15 @@ public final class CourseTab implements Drawable {
     private final EndBar endBar;
     private ArrayList<Bar> gradeBarList;
 
-    private Button addButton;
-    private Button infoButton;
+    private Button addButton, infoButton, resetButton;
 
     private Course course;
     private Map<String, Object> settings;
 
-    public CourseTab(Course course, Map<String, Object> settings, DrawingPanel panel,
-            Rectangle rect, String text, Color color, Button.ButtonPlan plan) {
+    public CoursePage(Course course, Map<String, Object> settings, DrawingPanel panel) {
         this.panel = panel;
-        tab = new Button(panel, rect, text, color, plan);
+        tab = new Button(panel, new Rectangle(), course.getName(),
+                (Color) settings.get("color dark"), (Button.ButtonPlan) settings.get("style"));
         gradeBarList = new ArrayList<>();
         this.course = course;
         this.settings = settings;
@@ -58,6 +58,7 @@ public final class CourseTab implements Drawable {
 
         initAddButton();
         initInfoButton();
+        initResetButton();
 
         for (EntryGrade entryGrade : course.getGradeList()) {
             addGrade(entryGrade);
@@ -102,6 +103,23 @@ public final class CourseTab implements Drawable {
         infoButton.setEnabled(false);
     }
 
+    private void initResetButton() {
+        resetButton = new Button(panel,
+                new Rectangle(0, 0, TITLE_HEIGHT * 2 / 3, TITLE_HEIGHT * 2 / 3),
+                "X", new Font("Arial", Font.BOLD, 24), (Color) settings.get("color dark"),
+                (Button.ButtonPlan) settings.get("style"));
+        resetButton.setFontScale(.5);
+        resetButton.addActionListener(event -> {
+            int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to reset "
+                    + "all parameters and custom grades?", "Reset All", JOptionPane.YES_NO_OPTION);
+            if (choice == JOptionPane.YES_OPTION) {
+                course.resetAll();
+                updateBars(true);
+            }
+        });
+        resetButton.setEnabled(false);
+    }
+
     public Button getTab() {
         return tab;
     }
@@ -112,6 +130,10 @@ public final class CourseTab implements Drawable {
 
     public Button getInfoButton() {
         return infoButton;
+    }
+
+    public Button getResetButton() {
+        return resetButton;
     }
 
     //change colors, disable/enable
@@ -139,18 +161,29 @@ public final class CourseTab implements Drawable {
         }
 
         //go thru grade list to find grade that is marked for deletion
-        for (int i = 0; i < course.getGradeList().size(); i++) {
-            EntryGrade grade = course.getGradeList().get(i);
-            if (grade.isCustom() && grade.isGrayed()) {
-                course.getGradeList().remove(i);
-                Bar removed = gradeBarList.remove(i);
-                for (Button button : removed.getButtons())
+        course.getGradeList().removeIf(grade -> grade.isCustom() && grade.isGrayed());
+
+        //kill and remove all bars of grades that no longer exist
+        final int COURSE_SIZE = course.getGradeList().size();
+        for (int i = 0; i < gradeBarList.size(); i++) {
+            Bar bar = gradeBarList.get(i);
+            if (i >= COURSE_SIZE || bar.getGrade() != course.getGradeList().get(i)) {
+                gradeBarList.remove(i);
+                for (Button button : bar.getButtons())
                     button.kill();
+                i--;
                 doPositions = true;
-                course.update();
-                break;
             }
         }
+
+        //TEST
+        for (Bar bar : gradeBarList) {
+            System.out.println(bar.getButtons()[2].getText());
+        }
+        for (EntryGrade entryGrade : course.getGradeList()) {
+            System.out.println(entryGrade);
+        }
+        System.out.println(course.getName().toUpperCase());
 
         //update texts of grade bars
         for (Bar bar : gradeBarList)
@@ -166,6 +199,7 @@ public final class CourseTab implements Drawable {
                 bar.setInitialScroll(vertPosition);
                 vertPosition += SIZE + 1; //+1 for small gaps b/t bars
             }
+            course.update();
         }
 
         if (lockResponder) {
@@ -197,6 +231,7 @@ public final class CourseTab implements Drawable {
         }
         addButton.setEnabled(active);
         infoButton.setEnabled(active);
+        resetButton.setEnabled(active);
     }
 
     @Override
@@ -229,6 +264,7 @@ public final class CourseTab implements Drawable {
 
         addButton.setX(panel.getWidth() - addButton.getRect().width);
         infoButton.setX(panel.getWidth() - addButton.getRect().width * 2 - 1);
+        resetButton.setX(panel.getWidth() - addButton.getRect().width * 3 - 2);
 
         for (Bar bar : gradeBarList)
             bar.draw(g);
@@ -247,6 +283,7 @@ public final class CourseTab implements Drawable {
 
         addButton.draw(g);
         infoButton.draw(g);
+        resetButton.draw(g);
     }
 
     private int scrollPosition;
