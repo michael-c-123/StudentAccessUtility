@@ -110,8 +110,12 @@ public final class CoursePage implements Page {
                 (Button.ButtonPlan) settings.get("style"));
         resetButton.setFontScale(.5);
         resetButton.addActionListener(event -> {
-            course.resetAll();
-            updateBars(true);
+            int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to reset "
+                    + "all parameters and custom grades?", "Reset All", JOptionPane.YES_NO_OPTION);
+            if (choice == JOptionPane.YES_OPTION) {
+                course.resetAll();
+                updateBars(true);
+            }
         });
         resetButton.setEnabled(false);
     }
@@ -126,6 +130,10 @@ public final class CoursePage implements Page {
 
     public Button getInfoButton() {
         return infoButton;
+    }
+
+    public Button getResetButton() {
+        return resetButton;
     }
 
     //change colors, disable/enable

@@ -85,6 +85,9 @@ public class DrawingPanel extends JPanel implements MouseWheelListener {
                             tab.getAddButton().doClick();
                         else if (ke.getKeyCode() == KeyEvent.VK_I)
                             tab.getInfoButton().doClick();
+                        else if (ke.getKeyCode() == KeyEvent.VK_BACK_SPACE
+                                || ke.getKeyCode() == KeyEvent.VK_DELETE)
+                            tab.getResetButton().doClick();
                     }
                     else {
                         int scrollBy;
