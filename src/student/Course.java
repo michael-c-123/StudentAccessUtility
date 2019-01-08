@@ -4,6 +4,7 @@ package student;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * @author Michael
@@ -342,6 +343,13 @@ public class Course implements Serializable, Comparable<Course> {
         }
     }
 
+    public void resetAll() {
+        gradeList.removeIf(test -> test.isCustom());
+        getCurrent(true).reset();
+        exam.reset();
+        sem.reset();
+    }
+
     public int getActualEstimate() {
         return actualEstimate;
     }
@@ -352,7 +360,10 @@ public class Course implements Serializable, Comparable<Course> {
 
     @Override
     public String toString() {
-        return "Course{" + "name=" + name + ", period=" + period + ", exam=" + exam + ", m1=" + m1 + ", m2=" + m2 + ", sem=" + sem + ", major=" + major + ", daily=" + daily + ", majorSplit=" + majorSplit + ", onM1=" + onM1 + '}';
+        return "Course{" + "name=" + name + ", period=" + period + ", exam="
+                + exam + ", m1=" + m1 + ", m2=" + m2 + ", sem=" + sem
+                + ", major=" + major + ", daily=" + daily + ", majorSplit="
+                + majorSplit + ", onM1=" + onM1 + '}';
     }
 
     @Override

@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.ListIterator;
 import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -27,8 +28,7 @@ public final class CoursePage implements Page {
     private final EndBar endBar;
     private ArrayList<Bar> gradeBarList;
 
-    private Button addButton;
-    private Button infoButton;
+    private Button addButton, infoButton, resetButton;
 
     private Course course;
     private Map<String, Object> settings;
@@ -58,6 +58,7 @@ public final class CoursePage implements Page {
 
         initAddButton();
         initInfoButton();
+        initResetButton();
 
         for (EntryGrade entryGrade : course.getGradeList()) {
             addGrade(entryGrade);
@@ -102,6 +103,19 @@ public final class CoursePage implements Page {
         infoButton.setEnabled(false);
     }
 
+    private void initResetButton() {
+        resetButton = new Button(panel,
+                new Rectangle(0, 0, TITLE_HEIGHT * 2 / 3, TITLE_HEIGHT * 2 / 3),
+                "X", new Font("Arial", Font.BOLD, 24), (Color) settings.get("color dark"),
+                (Button.ButtonPlan) settings.get("style"));
+        resetButton.setFontScale(.5);
+        resetButton.addActionListener(event -> {
+            course.resetAll();
+            updateBars(true);
+        });
+        resetButton.setEnabled(false);
+    }
+
     public Button getTab() {
         return tab;
     }
@@ -139,18 +153,29 @@ public final class CoursePage implements Page {
         }
 
         //go thru grade list to find grade that is marked for deletion
-        for (int i = 0; i < course.getGradeList().size(); i++) {
-            EntryGrade grade = course.getGradeList().get(i);
-            if (grade.isCustom() && grade.isGrayed()) {
-                course.getGradeList().remove(i);
-                Bar removed = gradeBarList.remove(i);
-                for (Button button : removed.getButtons())
+        course.getGradeList().removeIf(grade -> grade.isCustom() && grade.isGrayed());
+
+        //kill and remove all bars of grades that no longer exist
+        final int COURSE_SIZE = course.getGradeList().size();
+        for (int i = 0; i < gradeBarList.size(); i++) {
+            Bar bar = gradeBarList.get(i);
+            if (i >= COURSE_SIZE || bar.getGrade() != course.getGradeList().get(i)) {
+                gradeBarList.remove(i);
+                for (Button button : bar.getButtons())
                     button.kill();
+                i--;
                 doPositions = true;
-                course.update();
-                break;
             }
         }
+
+        //TEST
+        for (Bar bar : gradeBarList) {
+            System.out.println(bar.getButtons()[2].getText());
+        }
+        for (EntryGrade entryGrade : course.getGradeList()) {
+            System.out.println(entryGrade);
+        }
+        System.out.println(course.getName().toUpperCase());
 
         //update texts of grade bars
         for (Bar bar : gradeBarList)
@@ -166,6 +191,7 @@ public final class CoursePage implements Page {
                 bar.setInitialScroll(vertPosition);
                 vertPosition += SIZE + 1; //+1 for small gaps b/t bars
             }
+            course.update();
         }
 
         if (lockResponder) {
@@ -197,6 +223,7 @@ public final class CoursePage implements Page {
         }
         addButton.setEnabled(active);
         infoButton.setEnabled(active);
+        resetButton.setEnabled(active);
     }
 
     @Override
@@ -229,6 +256,7 @@ public final class CoursePage implements Page {
 
         addButton.setX(panel.getWidth() - addButton.getRect().width);
         infoButton.setX(panel.getWidth() - addButton.getRect().width * 2 - 1);
+        resetButton.setX(panel.getWidth() - addButton.getRect().width * 3 - 2);
 
         for (Bar bar : gradeBarList)
             bar.draw(g);
@@ -247,6 +275,7 @@ public final class CoursePage implements Page {
 
         addButton.draw(g);
         infoButton.draw(g);
+        resetButton.draw(g);
     }
 
     private int scrollPosition;
